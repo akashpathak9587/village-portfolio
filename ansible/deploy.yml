@@ -1,0 +1,178 @@
+---
+# Deploy the village portfolio container to every host in the [web] group.
+#
+#   ansible-galaxy collection install -r requirements.yml
+#   ansible-playbook deploy.yml                              # deploy :latest
+#   ansible-playbook deploy.yml -e image_tag=42              # deploy / roll back to build 42
+#
+# Supported targets: Ubuntu 20.04+/Debian 11+ and Amazon Linux 2023 / RHEL-family 9.
+
+- name: Deploy village portfolio
+  hosts: web
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Show what is being deployed
+      ansible.builtin.debug:
+        msg: "Deploying {{ image_name }}:{{ image_tag }} to {{ inventory_hostname }} on port {{ host_port }}"
+
+  tasks:
+    # ------------------------------------------------------------------
+    # 1. Docker engine
+    # ------------------------------------------------------------------
+    - name: Install Docker on Debian/Ubuntu
+      when: ansible_os_family == "Debian"
+      block:
+        - name: Install prerequisites
+          ansible.builtin.apt:
+            name: [ca-certificates, curl, gnupg]
+            state: present
+            update_cache: true
+            cache_valid_time: 3600
+
+        - name: Create keyrings directory
+          ansible.builtin.file:
+            path: /etc/apt/keyrings
+            state: directory
+            mode: "0755"
+
+        - name: Add Docker GPG key
+          ansible.builtin.get_url:
+            url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+            dest: /etc/apt/keyrings/docker.asc
+            mode: "0644"
+
+        - name: Add Docker apt repository
+          ansible.builtin.apt_repository:
+            repo: >-
+              deb [arch={{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}
+              signed-by=/etc/apt/keyrings/docker.asc]
+              https://download.docker.com/linux/{{ ansible_distribution | lower }}
+              {{ ansible_distribution_release }} stable
+            filename: docker
+            state: present
+
+        - name: Install Docker Engine and Python SDK
+          ansible.builtin.apt:
+            name: [docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin, python3-docker]
+            state: present
+            update_cache: true
+
+    - name: Install Docker on Amazon Linux / RHEL family
+      when: ansible_os_family == "RedHat"
+      block:
+        - name: Install docker and pip (Amazon Linux)
+          ansible.builtin.dnf:
+            name: [docker, python3-pip]
+            state: present
+          when: ansible_distribution == "Amazon"
+
+        - name: Add Docker CE repo (RHEL/Rocky/Alma)
+          ansible.builtin.get_url:
+            url: https://download.docker.com/linux/rhel/docker-ce.repo
+            dest: /etc/yum.repos.d/docker-ce.repo
+            mode: "0644"
+          when: ansible_distribution != "Amazon"
+
+        - name: Install Docker CE (RHEL/Rocky/Alma)
+          ansible.builtin.dnf:
+            name: [docker-ce, docker-ce-cli, containerd.io, python3-pip]
+            state: present
+          when: ansible_distribution != "Amazon"
+
+        - name: Install Docker SDK for Python
+          ansible.builtin.pip:
+            name: docker
+            state: present
+
+    - name: Ensure Docker is running and starts on boot
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Let the SSH user run docker without sudo
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: true
+      when: ansible_user is defined and ansible_user != 'root'
+
+    # ------------------------------------------------------------------
+    # 2. Firewall (Ubuntu/Debian with UFW)
+    # ------------------------------------------------------------------
+    - name: Check whether UFW is installed
+      ansible.builtin.command: which ufw
+      register: ufw_check
+      changed_when: false
+      failed_when: false
+
+    - name: Allow SSH and the web port through UFW
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop: ["22", "{{ host_port | string }}"]
+      when: open_firewall and ufw_check.rc == 0
+
+    # ------------------------------------------------------------------
+    # 3. Pull and run the container
+    # ------------------------------------------------------------------
+    - name: Log in to the container registry
+      community.docker.docker_login:
+        registry_url: "{{ registry_url }}"
+        username: "{{ registry_username }}"
+        password: "{{ registry_password }}"
+      when: registry_username | length > 0 and registry_password | length > 0
+      no_log: true
+
+    - name: Pull the image
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        tag: "{{ image_tag }}"
+        source: pull
+        force_source: true
+
+    - name: Run the portfolio container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image_name }}:{{ image_tag }}"
+        state: started
+        restart_policy: unless-stopped
+        recreate: true
+        pull: false
+        published_ports:
+          - "{{ host_port }}:80"
+        healthcheck:
+          test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+          interval: 30s
+          timeout: 3s
+          retries: 3
+        labels:
+          app: village-portfolio
+          version: "{{ image_tag | string }}"
+
+    # ------------------------------------------------------------------
+    # 4. Verify
+    # ------------------------------------------------------------------
+    - name: Wait for the site to answer
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ host_port }}/healthz"
+        return_content: true
+      register: health
+      until: health.status == 200
+      retries: 15
+      delay: 2
+
+    - name: Remove old, unused images
+      community.docker.docker_prune:
+        images: true
+        images_filters:
+          dangling: false
+          label: org.opencontainers.image.title=village-portfolio
+      when: prune_old_images
+
+    - name: Deployment summary
+      ansible.builtin.debug:
+        msg: "✅ {{ image_name }}:{{ image_tag }} is live at http://{{ ansible_host | default(inventory_hostname) }}:{{ host_port }}"

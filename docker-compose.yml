@@ -1,0 +1,8 @@
+services:
+  portfolio:
+    build: .
+    image: ${IMAGE:-village-portfolio:latest}
+    container_name: village-portfolio
+    ports:
+      - "${HOST_PORT:-8080}:80"
+    restart: unless-stopped
