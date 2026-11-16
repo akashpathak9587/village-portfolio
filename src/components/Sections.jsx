@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 
 function Reveal({ className = '', children, ...rest }) {
   const ref = useRef();
@@ -32,7 +32,7 @@ function Stop({ index, id, side, kicker, title, children }) {
   );
 }
 
-export default function Sections({ profile, milestones, ride }) {
+function Sections({ profile, milestones, onStartRide }) {
   const sideOf = (i) => (i % 2 === 0 ? 'left' : 'right');
   return (
     <main className="content">
@@ -48,7 +48,7 @@ export default function Sections({ profile, milestones, ride }) {
           <p className="hero__role">{profile.role}</p>
           <p className="hero__tagline">{profile.tagline}</p>
           <div className="hero__actions">
-            <button className="btn" onClick={ride.startAuto}>
+            <button className="btn" onClick={onStartRide}>
               Take the ride →
             </button>
             {profile.resumeUrl && (
@@ -188,3 +188,6 @@ export default function Sections({ profile, milestones, ride }) {
     </main>
   );
 }
+
+// Memoised: scrolling never changes these props, so the content never re-renders mid-ride.
+export default memo(Sections);

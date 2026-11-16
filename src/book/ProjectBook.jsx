@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import TopTabs from '../components/TopTabs';
+import useSmoothWheel from '../components/useSmoothWheel';
 import { buildPages, renderEndpaper } from './pages';
 import './book.css';
 
@@ -44,6 +45,7 @@ function usePageWidth(single) {
  */
 export default function ProjectBook({ profile, route, reducedMotion }) {
   const single = useMedia('(max-width: 820px)');
+  useSmoothWheel();
   const pw = usePageWidth(single);
 
   const wrapRef = useRef(null);

@@ -5,6 +5,7 @@ import { milestones, profile } from './data/profile';
 import RouteBar from './components/RouteBar';
 import Sections from './components/Sections';
 import useJourneyScroll from './components/useJourneyScroll';
+import useSmoothWheel from './components/useSmoothWheel';
 import useHashRoute, { ROUTES, savedScroll } from './components/useHashRoute';
 import ProjectBook from './book/ProjectBook';
 
@@ -32,6 +33,7 @@ const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(pre
 function JourneyView({ route, onReady }) {
   const [webgl] = useState(hasWebGL);
   const ride = useJourneyScroll(milestones.length);
+  useSmoothWheel();
 
   useLayoutEffect(() => {
     // Return the visitor to where they left the ride.
@@ -50,7 +52,7 @@ function JourneyView({ route, onReady }) {
           <SceneBoundary>
             <Canvas
               shadows
-              dpr={[1, 1.75]}
+              dpr={[1, 1.5]}
               camera={{ fov: 50, near: 0.1, far: 400, position: [10, 12, 20] }}
               gl={{ antialias: true, powerPreference: 'high-performance' }}
               onCreated={() => setTimeout(onReady, 400)}
@@ -63,7 +65,7 @@ function JourneyView({ route, onReady }) {
         )}
       </div>
       <RouteBar milestones={milestones} ride={ride} route={route} />
-      <Sections profile={profile} milestones={milestones} ride={ride} />
+      <Sections profile={profile} milestones={milestones} onStartRide={ride.startAuto} />
     </>
   );
 }

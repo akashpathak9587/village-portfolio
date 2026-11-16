@@ -34,6 +34,27 @@ function samplePalette(p) {
   return out;
 }
 
+/**
+ * Critically damped spring (Unity's SmoothDamp). `state.vel` carries velocity between frames,
+ * `maxSpeed` caps how fast progress can change (units per second).
+ */
+function smoothDamp(current, target, state, smoothTime, dt, maxSpeed) {
+  const omega = 2 / smoothTime;
+  const x = omega * dt;
+  const exp = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+  const maxChange = maxSpeed * smoothTime;
+  const change = THREE.MathUtils.clamp(current - target, -maxChange, maxChange);
+  const temp = (state.vel + omega * change) * dt;
+  state.vel = (state.vel - omega * temp) * exp;
+  let out = current - change + (change + temp) * exp;
+  // Never overshoot the target.
+  if (target - current > 0 === out > target) {
+    out = target;
+    state.vel = 0;
+  }
+  return out;
+}
+
 /** Big inverted sphere with a vertical gradient — a soft, modern sky. */
 function SkyDome({ material }) {
   const ref = useRef();
@@ -115,16 +136,21 @@ export default function VillageJourney({ milestones, reducedMotion }) {
     () => ({
       pos: new THREE.Vector3(), tan: new THREE.Vector3(), side: new THREE.Vector3(),
       desired: new THREE.Vector3(), look: new THREE.Vector3(), lookTarget: new THREE.Vector3(),
-      sunDir: new THREE.Vector3(), init: false,
+      sunDir: new THREE.Vector3(), init: false, vel: 0,
     }),
     [],
   );
 
   useFrame((state, dt) => {
     dt = Math.min(dt, 0.1);
-    // Ease the raw scroll progress so the ride feels like momentum, not a scrubber.
-    const ease = reducedMotion ? 1 : 1 - Math.pow(0.04, dt);
-    journey.smooth += (journey.p - journey.smooth) * ease;
+    // Spring the bike toward the scroll position: it accelerates away and coasts to a stop
+    // like a real ride instead of snapping to each wheel notch.
+    if (reducedMotion) {
+      journey.smooth = journey.p;
+      tmp.vel = 0;
+    } else {
+      journey.smooth = smoothDamp(journey.smooth, journey.p, tmp, 0.6, dt, 0.3);
+    }
     journey.dusk = THREE.MathUtils.smoothstep(journey.smooth, 0.78, 1.0);
 
     const t = progressToT(journey.smooth);
@@ -160,7 +186,7 @@ export default function VillageJourney({ milestones, reducedMotion }) {
       tmp.look.copy(tmp.lookTarget);
       tmp.init = true;
     }
-    const follow = 1 - Math.pow(0.03, dt);
+    const follow = 1 - Math.exp(-dt * 4.5);
     camera.position.lerp(tmp.desired, follow);
     tmp.look.lerp(tmp.lookTarget, follow);
     camera.lookAt(tmp.look);

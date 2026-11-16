@@ -1,15 +1,37 @@
+import { useEffect, useRef } from 'react';
 import TopTabs from './TopTabs';
+import { journey } from '../scene/path';
 
 export default function RouteBar({ milestones, ride, route }) {
-  const { active, progress, goTo, autoRiding, startAuto, stopAuto } = ride;
+  const { active, goTo, autoRiding, startAuto, stopAuto } = ride;
   const last = milestones.length - 1;
+  const doneRef = useRef(null);
+  const bikeRef = useRef(null);
+
+  // Follow the bike's eased position every frame, without re-rendering React.
+  useEffect(() => {
+    let raf = 0;
+    let shown = -1;
+    const tick = () => {
+      const p = Math.min(1, Math.max(0, journey.smooth));
+      if (Math.abs(p - shown) > 0.0002) {
+        shown = p;
+        if (doneRef.current) doneRef.current.style.transform = `scaleX(${p})`;
+        if (bikeRef.current) bikeRef.current.style.left = `${p * 100}%`;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   return (
     <header className="routebar">
       <TopTabs route={route} />
       <nav className="routebar__track" aria-label="Sections">
         <div className="routebar__road">
-          <div className="routebar__done" style={{ width: `${progress * 100}%` }} />
-          <div className="routebar__bike" style={{ left: `${progress * 100}%` }} aria-hidden="true">
+          <div className="routebar__done" ref={doneRef} />
+          <div className="routebar__bike" ref={bikeRef} aria-hidden="true">
             🚲
           </div>
         </div>
