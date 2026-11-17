@@ -8,6 +8,7 @@ import { theme } from '../config';
 
 // Modern pastel day cycle: pink dawn → clear blue day → peach golden hour → violet neon night.
 const SKY = theme.scene.sky;
+const INSPECT = import.meta.env.DEV ? new URLSearchParams(window.location.search).get('inspect') : null; // DEV-INSPECT
 
 const cA = new THREE.Color();
 const cB = new THREE.Color();
@@ -186,6 +187,13 @@ export default function VillageJourney({ milestones, reducedMotion }) {
     camera.position.lerp(tmp.desired, follow);
     tmp.look.lerp(tmp.lookTarget, follow);
     camera.lookAt(tmp.look);
+
+    // DEV-INSPECT: ?inspect=back|side|front|top puts the camera right next to the rider.
+    if (INSPECT) {
+      const o = { back: [-1.6, 0.3, 1.7], side: [0.1, 2.0, 1.4], front: [1.8, 0.4, 1.6], top: [-0.6, 0.2, 2.6], left: [0.1, -2.0, 1.4] }[INSPECT] || [-1.6, 0.3, 1.7];
+      camera.position.copy(tmp.pos).addScaledVector(tmp.tan, o[0]).addScaledVector(tmp.side, o[1]).add({ x: 0, y: o[2], z: 0 });
+      camera.lookAt(tmp.pos.x, tmp.pos.y + 1.25, tmp.pos.z);
+    }
 
     // Time of day.
     const pal = samplePalette(journey.smooth);

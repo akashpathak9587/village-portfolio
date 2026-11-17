@@ -154,29 +154,55 @@ function alignBetween(obj, a, b) {
  */
 function Backpack({ reflectRef }) {
   const g = useMemo(() => {
-    const strap = (s) =>
-      new THREE.TubeGeometry(
-        new THREE.CatmullRomCurve3([
-          V(s * 0.09, 0.17, -0.16),
-          V(s * 0.11, 0.29, -0.08),
-          V(s * 0.115, 0.31, 0.03),
-          V(s * 0.11, 0.23, 0.135),
-          V(s * 0.105, 0.05, 0.155),
-          V(s * 0.12, -0.11, 0.135),
-          V(s * 0.15, -0.17, 0.02),
-          V(s * 0.14, -0.16, -0.13),
-        ]),
-        48,
-        0.013,
-        6,
-        false,
-      );
+    // Torso shape (must match the jacket capsule in <Torso>): radius, half-length, x/z scale.
+    const R = 0.165;
+    const H = 0.15;
+    const SX = 1.12;
+    const SZ = 0.82;
+    const OFF = 0.014; // strap thickness: sits just on top of the fabric
+    const radAt = (y) => (Math.abs(y) <= H ? R : Math.sqrt(Math.max(0, R * R - (Math.abs(y) - H) ** 2)));
+    // Depth of the jacket surface at (x, y), measured from the spine.
+    const depthAt = (x, y) => SZ * Math.sqrt(Math.max(0, radAt(y) ** 2 - (x / SX) ** 2));
+
+    const strap = (s) => {
+      const x = s * 0.095;
+      const yTop = H + Math.sqrt(R * R - (0.095 / SX) ** 2); // top of the shoulder at this x
+      const pts = [];
+      // Up the back (starting inside the bag so there is no visible end)…
+      for (const y of [0.15, 0.2, 0.24, 0.27]) pts.push(V(x, y, -(depthAt(x, y) + OFF)));
+      // …over the shoulder…
+      pts.push(V(x, yTop + OFF, 0));
+      // …down the chest to the armpit…
+      for (const y of [0.27, 0.24, 0.2, 0.14, 0.08, 0.04]) pts.push(V(x, y, depthAt(x, y) + OFF));
+      // …then diagonally down and back under the arm into the bag's bottom corner.
+      const wrap = [0.6, 0.95, 1.3, 1.65, 2.0, 2.35, 2.7];
+      wrap.forEach((b, k) => {
+        const y = 0.02 - (k / (wrap.length - 1)) * 0.18;
+        pts.push(V(s * (SX * radAt(y) + OFF) * Math.sin(b), y, (SZ * radAt(y) + OFF) * Math.cos(b)));
+      });
+      return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 80, 0.012, 6, false);
+    };
+    // Chest strap: hugs the chest between the two shoulder straps.
+    const chestY = 0.1;
+    const chest = new THREE.TubeGeometry(
+      new THREE.CatmullRomCurve3(
+        [-0.095, -0.05, 0, 0.05, 0.095].map((x) => V(x, chestY, depthAt(x, chestY) + OFF + 0.002)),
+      ),
+      24,
+      0.008,
+      6,
+      false,
+    );
+    const buckleZ = depthAt(0, chestY) + OFF + 0.008;
     return {
       body: new RoundedBoxGeometry(0.3, 0.38, 0.14, 4, 0.05),
       pocket: new RoundedBoxGeometry(0.22, 0.15, 0.06, 3, 0.025),
       lid: new RoundedBoxGeometry(0.26, 0.07, 0.13, 3, 0.03),
       strapL: strap(-1),
       strapR: strap(1),
+      chest,
+      buckleZ,
+      chestY,
     };
   }, []);
   const mats = useMemo(() => {
@@ -192,7 +218,7 @@ function Backpack({ reflectRef }) {
   }, []);
   return (
     <group>
-      <group position={[0, 0, -0.205]} rotation={[0.06, 0, 0]}>
+      <group position={[0, -0.01, -0.158]} rotation={[0.12, 0, 0]}>
         {/* main compartment + top lid */}
         <mesh geometry={g.body} material={mats.body} castShadow />
         <mesh geometry={g.lid} material={mats.lid} position={[0, 0.17, -0.008]} castShadow />
@@ -239,11 +265,9 @@ function Backpack({ reflectRef }) {
       {/* curved shoulder straps + chest strap with buckle */}
       <mesh geometry={g.strapL} material={mats.strap} />
       <mesh geometry={g.strapR} material={mats.strap} />
-      <mesh position={[0, 0.12, 0.158]} material={mats.strap}>
-        <boxGeometry args={[0.2, 0.016, 0.008]} />
-      </mesh>
-      <mesh position={[0, 0.12, 0.163]} material={mats.pull}>
-        <boxGeometry args={[0.04, 0.03, 0.012]} />
+      <mesh geometry={g.chest} material={mats.strap} />
+      <mesh position={[0, g.chestY, g.buckleZ]} material={mats.pull}>
+        <boxGeometry args={[0.04, 0.028, 0.01]} />
       </mesh>
     </group>
   );
@@ -368,7 +392,6 @@ export default function Bicycle() {
   const lean = useRef();
   const body = useRef();
   const head = useRef();
-  const scarf = useRef();
   const rearSpin = useRef();
   const frontSpin = useRef();
   const crank = useRef();
@@ -473,11 +496,9 @@ export default function Bicycle() {
     body.current.position.y = bob;
     s.hipL.y = s.hipR.y = P.hip.y + bob;
 
-    // Head glances around now and then; scarf flutters faster with speed.
+    // Head glances around now and then.
     head.current.rotation.y = Math.sin(clock.elapsedTime * 0.45) * 0.22;
     head.current.rotation.x = 0.08 + Math.sin(clock.elapsedTime * 0.7) * 0.03;
-    scarf.current.rotation.x =
-      1.0 + moving * 0.35 + Math.sin(clock.elapsedTime * (6 + moving * 10)) * (0.06 + moving * 0.12);
 
     // Legs: hip → knee → ankle, feet planted on the pedals.
     for (const side of ['r', 'l']) {
@@ -651,13 +672,6 @@ export default function Bicycle() {
           <Arm shoulder={SHOULDER_L} elbow={ELBOW_L} grip={GRIP_L} material={mats.jacket} />
           <Arm shoulder={SHOULDER_R} elbow={ELBOW_R} grip={GRIP_R} material={mats.jacket} />
           <Head headRef={head} />
-          {/* scarf tail streaming behind the neck */}
-          <group position={[0, 1.58, -0.05]} ref={scarf}>
-            <mesh position={[0, -0.15, 0]} castShadow>
-              <boxGeometry args={[0.09, 0.3, 0.018]} />
-              <meshStandardMaterial color={C.accent} roughness={0.6} side={THREE.DoubleSide} />
-            </mesh>
-          </group>
         </group>
       </group>
     </group>
