@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { curve, curveLength, journey, placeTube, progressToT } from './path';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { theme } from '../config';
 
 /*
@@ -147,7 +148,108 @@ function alignBetween(obj, a, b) {
 
 /* ---------------- rider ---------------- */
 
-function Torso() {
+/**
+ * Rounded daypack worn on the rider's back. Built in the torso's local frame:
+ * +Y runs up the spine, +Z points out of the chest, the back surface is at z ≈ -0.135.
+ */
+function Backpack({ reflectRef }) {
+  const g = useMemo(() => {
+    const strap = (s) =>
+      new THREE.TubeGeometry(
+        new THREE.CatmullRomCurve3([
+          V(s * 0.09, 0.17, -0.16),
+          V(s * 0.11, 0.29, -0.08),
+          V(s * 0.115, 0.31, 0.03),
+          V(s * 0.11, 0.23, 0.135),
+          V(s * 0.105, 0.05, 0.155),
+          V(s * 0.12, -0.11, 0.135),
+          V(s * 0.15, -0.17, 0.02),
+          V(s * 0.14, -0.16, -0.13),
+        ]),
+        48,
+        0.013,
+        6,
+        false,
+      );
+    return {
+      body: new RoundedBoxGeometry(0.3, 0.38, 0.14, 4, 0.05),
+      pocket: new RoundedBoxGeometry(0.22, 0.15, 0.06, 3, 0.025),
+      lid: new RoundedBoxGeometry(0.26, 0.07, 0.13, 3, 0.03),
+      strapL: strap(-1),
+      strapR: strap(1),
+    };
+  }, []);
+  const mats = useMemo(() => {
+    const base = new THREE.Color(C.basket);
+    return {
+      body: new THREE.MeshStandardMaterial({ color: base, roughness: 0.75 }),
+      pocket: new THREE.MeshStandardMaterial({ color: base.clone().lerp(new THREE.Color(C.dark), 0.3), roughness: 0.8 }),
+      lid: new THREE.MeshStandardMaterial({ color: base.clone().lerp(new THREE.Color(C.dark), 0.15), roughness: 0.75 }),
+      strap: new THREE.MeshStandardMaterial({ color: C.dark, roughness: 0.85 }),
+      zip: new THREE.MeshStandardMaterial({ color: '#15161c', roughness: 0.5 }),
+      pull: new THREE.MeshStandardMaterial({ color: C.accent, roughness: 0.4, metalness: 0.3 }),
+    };
+  }, []);
+  return (
+    <group>
+      <group position={[0, 0, -0.205]} rotation={[0.06, 0, 0]}>
+        {/* main compartment + top lid */}
+        <mesh geometry={g.body} material={mats.body} castShadow />
+        <mesh geometry={g.lid} material={mats.lid} position={[0, 0.17, -0.008]} castShadow />
+        {/* main zipper with two pulls */}
+        <mesh position={[0, 0.125, -0.071]} material={mats.zip}>
+          <boxGeometry args={[0.25, 0.009, 0.006]} />
+        </mesh>
+        {[-0.07, 0.08].map((x) => (
+          <mesh key={x} position={[x, 0.108, -0.074]} material={mats.pull}>
+            <boxGeometry args={[0.014, 0.03, 0.006]} />
+          </mesh>
+        ))}
+        {/* front pocket with its own zipper */}
+        <mesh geometry={g.pocket} material={mats.pocket} position={[0, -0.085, -0.078]} castShadow />
+        <mesh position={[0, -0.02, -0.109]} material={mats.zip}>
+          <boxGeometry args={[0.18, 0.008, 0.006]} />
+        </mesh>
+        <mesh position={[0.06, -0.035, -0.112]} material={mats.pull}>
+          <boxGeometry args={[0.012, 0.026, 0.006]} />
+        </mesh>
+        {/* reflective strip that glows at night */}
+        <mesh position={[0, 0.04, -0.072]}>
+          <boxGeometry args={[0.2, 0.018, 0.004]} />
+          <meshStandardMaterial ref={reflectRef} color="#f4f7ff" emissive="#dff6ff" emissiveIntensity={0.2} toneMapped={false} />
+        </mesh>
+        {/* grab handle */}
+        <mesh position={[0, 0.205, 0]} material={mats.strap}>
+          <torusGeometry args={[0.035, 0.008, 6, 16, Math.PI]} />
+        </mesh>
+        {/* side bottle pocket */}
+        <group position={[0.165, -0.09, 0]}>
+          <mesh material={mats.pocket}>
+            <cylinderGeometry args={[0.038, 0.034, 0.13, 16]} />
+          </mesh>
+          <mesh position={[0, 0.09, 0]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.07, 14]} />
+            <meshStandardMaterial color="#e9f6ff" roughness={0.2} metalness={0.1} />
+          </mesh>
+          <mesh position={[0, 0.135, 0]} material={mats.pull}>
+            <cylinderGeometry args={[0.02, 0.02, 0.025, 12]} />
+          </mesh>
+        </group>
+      </group>
+      {/* curved shoulder straps + chest strap with buckle */}
+      <mesh geometry={g.strapL} material={mats.strap} />
+      <mesh geometry={g.strapR} material={mats.strap} />
+      <mesh position={[0, 0.12, 0.158]} material={mats.strap}>
+        <boxGeometry args={[0.2, 0.016, 0.008]} />
+      </mesh>
+      <mesh position={[0, 0.12, 0.163]} material={mats.pull}>
+        <boxGeometry args={[0.04, 0.03, 0.012]} />
+      </mesh>
+    </group>
+  );
+}
+
+function Torso({ reflectRef }) {
   const ref = useRef();
   useLayoutEffect(() => alignBetween(ref.current, P.hip, P.shoulder), []);
   return (
@@ -166,23 +268,7 @@ function Torso() {
         <torusGeometry args={[0.09, 0.025, 8, 20]} />
         <meshStandardMaterial color={C.accent} roughness={0.5} />
       </mesh>
-      {/* backpack */}
-      <group position={[0, 0.02, -0.17]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.27, 0.32, 0.12]} />
-          <meshStandardMaterial color={C.basket} roughness={0.7} />
-        </mesh>
-        <mesh position={[0, 0.08, -0.065]}>
-          <boxGeometry args={[0.2, 0.1, 0.03]} />
-          <meshStandardMaterial color={C.dark} roughness={0.7} />
-        </mesh>
-        {[-0.09, 0.09].map((x) => (
-          <mesh key={x} position={[x, 0.1, 0.08]}>
-            <boxGeometry args={[0.035, 0.24, 0.03]} />
-            <meshStandardMaterial color={C.dark} />
-          </mesh>
-        ))}
-      </group>
+      <Backpack reflectRef={reflectRef} />
     </group>
   );
 }
@@ -288,6 +374,7 @@ export default function Bicycle() {
   const crank = useRef();
   const frontLight = useRef();
   const rearLight = useRef();
+  const reflectRef = useRef();
   const legs = {
     lThigh: useRef(), lShin: useRef(), rThigh: useRef(), rShin: useRef(),
     lCrank: useRef(), rCrank: useRef(), lPedal: useRef(), rPedal: useRef(),
@@ -409,6 +496,7 @@ export default function Bicycle() {
     // Lights brighten as evening falls.
     frontLight.current.emissiveIntensity = 0.6 + journey.dusk * 4;
     rearLight.current.emissiveIntensity = 0.5 + journey.dusk * 3;
+    reflectRef.current.emissiveIntensity = 0.15 + journey.dusk * 2.5;
   });
 
   return (
@@ -559,7 +647,7 @@ export default function Bicycle() {
           <mesh position={P.hip} scale={[1.25, 0.8, 1.1]} material={mats.pants} castShadow>
             <sphereGeometry args={[0.13, 18, 12]} />
           </mesh>
-          <Torso />
+          <Torso reflectRef={reflectRef} />
           <Arm shoulder={SHOULDER_L} elbow={ELBOW_L} grip={GRIP_L} material={mats.jacket} />
           <Arm shoulder={SHOULDER_R} elbow={ELBOW_R} grip={GRIP_R} material={mats.jacket} />
           <Head headRef={head} />
