@@ -13,6 +13,11 @@ import { theme } from '../config';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const WHEEL_R = 0.36;
+const TYRE_TUBE = 0.042;
+const TYRE_OUTER = WHEEL_R - 0.005 + TYRE_TUBE; // outermost point of the tyre
+const ROAD_Y = 0.045; // height of the road surface (see ROAD in World.jsx)
+/** Lift so the bottom of the tyres rests exactly on the road surface. */
+const RIDE_HEIGHT = ROAD_Y + (TYRE_OUTER - WHEEL_R);
 const CRANK_R = 0.17;
 const THIGH = 0.47;
 const SHIN = 0.47;
@@ -85,7 +90,7 @@ function Wheel({ position, spinRef }) {
       <group ref={spinRef}>
         {/* tyre */}
         <mesh rotation={[0, Math.PI / 2, 0]} castShadow>
-          <torusGeometry args={[WHEEL_R - 0.005, 0.042, 14, 48]} />
+          <torusGeometry args={[WHEEL_R - 0.005, TYRE_TUBE, 14, 48]} />
           <meshStandardMaterial color={C.tyre} roughness={0.95} />
         </mesh>
         {/* polished rim with a coloured pinstripe */}
@@ -385,6 +390,29 @@ function Shoe({ shoeRef }) {
   );
 }
 
+/** Soft dark blob under each tyre so the wheels read as touching the road. */
+function ContactShadows() {
+  const tex = useMemo(() => {
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = 64;
+    const ctx = cv.getContext('2d');
+    const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(0,0,0,0.75)');
+    g.addColorStop(0.45, 'rgba(0,0,0,0.35)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(cv);
+  }, []);
+  const y = ROAD_Y - RIDE_HEIGHT + 0.004; // just above the road surface, in bike space
+  return [P.rearHub.z, P.frontHub.z].map((z) => (
+    <mesh key={z} position={[0, y, z]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={2}>
+      <planeGeometry args={[0.16, 0.42]} />
+      <meshBasicMaterial map={tex} transparent depthWrite={false} toneMapped={false} />
+    </mesh>
+  ));
+}
+
 /* ---------------- bike + rider ---------------- */
 
 export default function Bicycle() {
@@ -462,7 +490,8 @@ export default function Bicycle() {
     curve.getPointAt(t, s.pos);
     curve.getTangentAt(t, s.tan);
     root.current.position.copy(s.pos);
-    root.current.lookAt(s.look.copy(s.pos).add(s.tan));
+    root.current.position.y += RIDE_HEIGHT;
+    root.current.lookAt(s.look.copy(root.current.position).add(s.tan));
 
     // Lean into curves.
     curve.getTangentAt(Math.min(1, t + 0.012), s.ahead);
@@ -522,6 +551,7 @@ export default function Bicycle() {
 
   return (
     <group ref={root}>
+      <ContactShadows />
       <group ref={lean}>
         {/* ---------- frame ---------- */}
         <Tube a={P.bb} b={P.seatTop} r={0.026} material={mats.paint} />

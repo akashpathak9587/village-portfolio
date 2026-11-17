@@ -188,11 +188,19 @@ export default function VillageJourney({ milestones, reducedMotion }) {
     tmp.look.lerp(tmp.lookTarget, follow);
     camera.lookAt(tmp.look);
 
-    // DEV-INSPECT: ?inspect=back|side|front|top puts the camera right next to the rider.
+    // DEV-INSPECT: ?inspect=back|side|left|front|top|wheels puts the camera right next to the rider.
     if (INSPECT) {
-      const o = { back: [-1.6, 0.3, 1.7], side: [0.1, 2.0, 1.4], front: [1.8, 0.4, 1.6], top: [-0.6, 0.2, 2.6], left: [0.1, -2.0, 1.4] }[INSPECT] || [-1.6, 0.3, 1.7];
+      // [along road, sideways, height, look-at height]
+      const o = {
+        back: [-1.6, 0.3, 1.7, 1.25],
+        side: [0.1, 2.0, 1.4, 1.25],
+        left: [0.1, -2.0, 1.4, 1.25],
+        front: [1.8, 0.4, 1.6, 1.25],
+        top: [-0.6, 0.2, 2.6, 1.25],
+        wheels: [0.0, 1.6, 0.25, 0.25],
+      }[INSPECT] || [-1.6, 0.3, 1.7, 1.25];
       camera.position.copy(tmp.pos).addScaledVector(tmp.tan, o[0]).addScaledVector(tmp.side, o[1]).add({ x: 0, y: o[2], z: 0 });
-      camera.lookAt(tmp.pos.x, tmp.pos.y + 1.25, tmp.pos.z);
+      camera.lookAt(tmp.pos.x, tmp.pos.y + o[3], tmp.pos.z);
     }
 
     // Time of day.
