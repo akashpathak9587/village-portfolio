@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import TopTabs from './TopTabs';
+import ThemePicker from './ThemePicker';
 import { journey } from '../scene/path';
 
 export default function RouteBar({ milestones, ride, route }) {
@@ -48,6 +49,7 @@ export default function RouteBar({ milestones, ride, route }) {
           </button>
         ))}
       </nav>
+      <ThemePicker />
       <button className="btn btn--small routebar__auto" onClick={autoRiding ? stopAuto : startAuto}>
         {autoRiding ? '❚❚ Pause ride' : '▶ Auto-ride'}
       </button>

@@ -1,5 +1,8 @@
 import { memo, useEffect, useRef } from 'react';
 
+/** Name of the 3D landmark beside each stop (matches LANDMARKS in scene/World.jsx). */
+const LANDMARK_NAMES = ['', 'Home', 'Wind turbine', 'The studio', 'The lake', 'Mailbox'];
+
 function Reveal({ className = '', children, ...rest }) {
   const ref = useRef();
   useEffect(() => {
@@ -18,7 +21,9 @@ function Reveal({ className = '', children, ...rest }) {
   );
 }
 
-function Stop({ index, id, side, kicker, title, children }) {
+function Stop({ index, id, title, children }) {
+  const side = index % 2 === 0 ? 'left' : 'right';
+  const kicker = LANDMARK_NAMES[index % LANDMARK_NAMES.length];
   return (
     <section id={id} data-stop={index} className={`stop stop--${side}`} aria-labelledby={`${id}-title`}>
       <Reveal>
@@ -32,42 +37,23 @@ function Stop({ index, id, side, kicker, title, children }) {
   );
 }
 
-function Sections({ profile, milestones, onStartRide }) {
-  const sideOf = (i) => (i % 2 === 0 ? 'left' : 'right');
-  return (
-    <main className="content">
-      {/* 0 — Hero */}
-      <section id={milestones[0].id} data-stop={0} className="stop stop--hero">
-        <div className="hero">
-          <p className="hero__badge">
-            <span className="hero__dot" aria-hidden="true" /> Open to full-stack roles
-          </p>
-          <h1>
-            <span className="hero__hello">Hi, I'm</span> {profile.name}
-          </h1>
-          <p className="hero__role">{profile.role}</p>
-          <p className="hero__tagline">{profile.tagline}</p>
-          <div className="hero__actions">
-            <button className="btn" onClick={onStartRide}>
-              Take the ride →
-            </button>
-            {profile.resumeUrl && (
-              <a className="btn btn--ghost" href={profile.resumeUrl} download>
-                Download résumé
-              </a>
-            )}
-          </div>
-          <p className="hero__hint">
-            <span className="mouse" aria-hidden="true" /> Scroll to pedal through the village
-          </p>
-        </div>
-      </section>
+const Chips = ({ items, small }) => (
+  <ul className={`chips ${small ? 'chips--small' : ''}`}>
+    {items.map((s) => (
+      <li key={s}>{s}</li>
+    ))}
+  </ul>
+);
 
-      {/* 1 — About */}
-      <Stop index={1} id={milestones[1].id} side={sideOf(1)} kicker="Home" title="About me">
-        {profile.about.map((p) => (
-          <p key={p}>{p}</p>
-        ))}
+/* ---------------- section bodies (one per section id in portfolio.json) ---------------- */
+
+function About({ profile }) {
+  return (
+    <>
+      {profile.about.map((p) => (
+        <p key={p}>{p}</p>
+      ))}
+      {profile.highlights.length > 0 && (
         <ul className="stats">
           {profile.highlights.map((h) => (
             <li key={h.label}>
@@ -76,115 +62,218 @@ function Sections({ profile, milestones, onStartRide }) {
             </li>
           ))}
         </ul>
-        <p className="muted">📍 {profile.location}</p>
-      </Stop>
+      )}
+      {profile.location && <p className="muted">📍 {profile.location}</p>}
+    </>
+  );
+}
 
-      {/* 2 — Skills */}
-      <Stop index={2} id={milestones[2].id} side={sideOf(2)} kicker="Wind turbine" title="Skills that keep things turning">
-        <div className="skills">
-          {profile.skills.map((g) => (
-            <div key={g.group} className="skills__group">
-              <h3>{g.group}</h3>
-              <ul className="chips">
-                {g.items.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+function Skills({ profile }) {
+  return (
+    <div className="skills">
+      {profile.skills.map((g) => (
+        <div key={g.group} className="skills__group">
+          <h3>{g.group}</h3>
+          <Chips items={g.items} />
         </div>
-      </Stop>
+      ))}
+    </div>
+  );
+}
 
-      {/* 3 — Experience */}
-      <Stop index={3} id={milestones[3].id} side={sideOf(3)} kicker="The studio" title="Work &amp; education">
-        <ol className="timeline">
-          {profile.experience.map((job) => (
-            <li key={job.company + job.period}>
-              <div className="timeline__head">
-                <h3>
-                  {job.role} <span>· {job.company}</span>
-                </h3>
-                <time>{job.period}</time>
-              </div>
-              <ul>
-                {job.points.map((p) => (
-                  <li key={p}>{p}</li>
-                ))}
-              </ul>
+function Experience({ profile }) {
+  return (
+    <ol className="timeline">
+      {profile.experience.map((job) => (
+        <li key={job.company + job.period}>
+          <div className="timeline__head">
+            <h3>
+              {job.role} <span>· {job.company}</span>
+            </h3>
+            <time>{job.period}</time>
+          </div>
+          <ul>
+            {job.points.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function Services({ profile }) {
+  return (
+    <>
+      <div className="services">
+        {profile.services.map((s) => (
+          <article key={s.title} className="service">
+            <span className="service__icon" aria-hidden="true">{s.icon}</span>
+            <h3>{s.title}</h3>
+            <p>{s.description}</p>
+            {s.deliverables?.length > 0 && <Chips items={s.deliverables} small />}
+          </article>
+        ))}
+      </div>
+      {profile.process.length > 0 && (
+        <ol className="process" aria-label="How we'll work">
+          {profile.process.map((step, i) => (
+            <li key={step}>
+              <span>{String(i + 1).padStart(2, '0')}</span>
+              {step}
             </li>
           ))}
         </ol>
-      </Stop>
-
-      {/* 4 — Projects */}
-      <Stop index={4} id={milestones[4].id} side={sideOf(4)} kicker="The lake" title="Things I've built">
-        <div className="projects">
-          {profile.projects.map((p) => (
-            <article key={p.name} className="project">
-              <h3>
-                <span aria-hidden="true">{p.icon}</span> {p.name}
-              </h3>
-              <p className="project__cat">{p.category}</p>
-              <ul className="chips chips--small">
-                {p.tech.map((t) => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ul>
-              {(p.link || p.repo) && (
-                <p className="project__links">
-                  {p.link && (
-                    <a href={p.link} target="_blank" rel="noreferrer">
-                      Live ↗
-                    </a>
-                  )}
-                  {p.repo && (
-                    <a href={p.repo} target="_blank" rel="noreferrer">
-                      Code ↗
-                    </a>
-                  )}
-                </p>
-              )}
-            </article>
-          ))}
-        </div>
-        <a className="btn book-cta" href="#/project-book">
-          📖 Read the full Project Book
-        </a>
-      </Stop>
-
-      {/* 5 — Contact */}
-      <Stop index={5} id={milestones[5].id} side={sideOf(5)} kicker="Mailbox" title="Let's work together">
-        <p>{profile.contactNote}</p>
-        <div className="contact">
-          <a className="btn" href={`mailto:${profile.email}`}>
-            ✉ {profile.email}
-          </a>
-          {profile.phone && (
-            <a className="btn btn--ghost" href={`tel:${profile.phone.replace(/\s/g, '')}`}>
-              ☎ {profile.phone}
-            </a>
-          )}
-        </div>
-        <ul className="links">
-          {profile.links.map((l) => (
-            <li key={l.url}>
-              <a href={l.url} target="_blank" rel="noreferrer">
-                {l.label} ↗
-              </a>
-            </li>
-          ))}
-          {profile.resumeUrl && (
-            <li>
-              <a href={profile.resumeUrl} download>
-                Résumé (PDF) ↓
-              </a>
-            </li>
-          )}
-        </ul>
-        <p className="muted small">
-          Built with React, Vite &amp; Three.js · Shipped with Docker, Jenkins &amp; Ansible
+      )}
+      {(profile.availability || profile.rates) && (
+        <p className="muted small availability">
+          {profile.availability && <span>● {profile.availability}</span>}
+          {profile.rates && <span>{profile.rates}</span>}
         </p>
-      </Stop>
+      )}
+    </>
+  );
+}
+
+function Projects({ profile }) {
+  return (
+    <>
+      <div className="projects">
+        {profile.projects.map((p) => (
+          <article key={p.name} className="project">
+            <h3>
+              <span aria-hidden="true">{p.icon}</span> {p.name}
+            </h3>
+            <p className="project__cat">{p.category}</p>
+            <Chips items={p.tech} small />
+            {(p.link || p.repo) && (
+              <p className="project__links">
+                {p.link && (
+                  <a href={p.link} target="_blank" rel="noreferrer">
+                    Live ↗
+                  </a>
+                )}
+                {p.repo && (
+                  <a href={p.repo} target="_blank" rel="noreferrer">
+                    Code ↗
+                  </a>
+                )}
+              </p>
+            )}
+          </article>
+        ))}
+      </div>
+      <a className="btn book-cta" href="#/project-book">
+        📖 {profile.mode === 'freelancer' ? 'Read the case studies' : 'Read the full Project Book'}
+      </a>
+    </>
+  );
+}
+
+function Contact({ profile }) {
+  const cta = profile.primaryCta;
+  return (
+    <>
+      {profile.testimonials.length > 0 && (
+        <div className="testimonials">
+          {profile.testimonials.map((t) => (
+            <figure key={t.quote} className="testimonial">
+              <blockquote>“{t.quote}”</blockquote>
+              <figcaption>
+                <strong>{t.name}</strong>
+                {t.role && <span> · {t.role}</span>}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
+      <p>{profile.contactNote}</p>
+      <div className="contact">
+        {cta && profile.mode === 'freelancer' && (
+          <a className="btn" href={cta.href}>
+            {cta.label} →
+          </a>
+        )}
+        <a className={`btn ${profile.mode === 'freelancer' ? 'btn--ghost' : ''}`} href={`mailto:${profile.email}`}>
+          ✉ {profile.email}
+        </a>
+        {profile.phone && (
+          <a className="btn btn--ghost" href={`tel:${profile.phone.replace(/\s/g, '')}`}>
+            ☎ {profile.phone}
+          </a>
+        )}
+      </div>
+      <ul className="links">
+        {profile.links.map((l) => (
+          <li key={l.url}>
+            <a href={l.url} target="_blank" rel="noreferrer">
+              {l.label} ↗
+            </a>
+          </li>
+        ))}
+        {profile.resumeUrl && (
+          <li>
+            <a href={profile.resumeUrl} download>
+              Résumé (PDF) ↓
+            </a>
+          </li>
+        )}
+      </ul>
+      <p className="muted small">Built with React, Vite &amp; Three.js · Shipped with Docker, Jenkins &amp; Ansible</p>
+    </>
+  );
+}
+
+const BODIES = { about: About, skills: Skills, experience: Experience, services: Services, projects: Projects, contact: Contact };
+
+/* ---------------- page ---------------- */
+
+function Hero({ profile, onStartRide }) {
+  const cta = profile.primaryCta;
+  return (
+    <div className="hero">
+      {profile.badge && (
+        <p className="hero__badge">
+          <span className="hero__dot" aria-hidden="true" /> {profile.badge}
+        </p>
+      )}
+      <h1>
+        <span className="hero__hello">Hi, I'm</span> {profile.name}
+      </h1>
+      <p className="hero__role">{profile.role}</p>
+      <p className="hero__tagline">{profile.tagline}</p>
+      <div className="hero__actions">
+        <button className="btn" onClick={onStartRide}>
+          Take the ride →
+        </button>
+        {cta && (
+          <a className="btn btn--ghost" href={cta.href} {...(cta.download ? { download: true } : {})}>
+            {cta.label}
+          </a>
+        )}
+      </div>
+      <p className="hero__hint">
+        <span className="mouse" aria-hidden="true" /> Scroll to pedal through the village
+      </p>
+    </div>
+  );
+}
+
+function Sections({ profile, milestones, onStartRide }) {
+  return (
+    <main className="content">
+      <section id={milestones[0].id} data-stop={0} className="stop stop--hero">
+        <Hero profile={profile} onStartRide={onStartRide} />
+      </section>
+      {milestones.slice(1).map((m, k) => {
+        const Body = BODIES[m.id];
+        return (
+          <Stop key={m.id} index={k + 1} id={m.id} title={m.title}>
+            <Body profile={profile} />
+          </Stop>
+        );
+      })}
     </main>
   );
 }

@@ -1,0 +1,241 @@
+{
+  "aurora": {
+    "name": "Aurora",
+    "description": "Dark glass with violet, pink and cyan; pastel village.",
+    "ui": {
+      "colorScheme": "dark",
+      "bg": "#0b0d17", "bg2": "#1a1640",
+      "glass": "rgba(13, 16, 32, 0.62)", "glassStrong": "rgba(13, 16, 32, 0.78)",
+      "fgRgb": "255 255 255", "shadowRgb": "5 6 20",
+      "text": "#f4f5ff", "textSoft": "#b9bfd8", "textDim": "#8a91ad",
+      "accent1": "#7c5cff", "accent2": "#c053ff", "accent3": "#ff5fa2", "accent4": "#22d3ee",
+      "ok": "#34d399", "okText": "#a7f3d0", "link": "#c7b8ff", "heading2": "#c9c3ff", "dot": "#2a2f4a",
+      "fonts": { "display": "Space Grotesk", "body": "Inter", "mono": "JetBrains Mono" }
+    },
+    "book": {
+      "cover": ["#1b1446", "#3b1d8f", "#7c3aed", "#c026d3"],
+      "paper": "#ffffff", "paper2": "#f7f8fd", "ink": "#0f1222", "soft": "#5b6280", "dim": "#8b91ab", "line": "#e8eaf3"
+    },
+    "scene": {
+      "sky": [
+        { "at": 0.0, "top": "#7fb2ff", "horizon": "#ffd3e2", "sun": "#ffd9b8", "sunI": 1.9, "hemi": 1.0, "elev": 0.22 },
+        { "at": 0.35, "top": "#3f8cff", "horizon": "#cfeeff", "sun": "#ffffff", "sunI": 2.5, "hemi": 1.15, "elev": 0.75 },
+        { "at": 0.7, "top": "#6a6dff", "horizon": "#ffc1a6", "sun": "#ffc08a", "sunI": 2.1, "hemi": 0.95, "elev": 0.32 },
+        { "at": 1.0, "top": "#120d35", "horizon": "#6b3fa0", "sun": "#ff7ab6", "sunI": 0.75, "hemi": 0.55, "elev": 0.06 }
+      ],
+      "grassLow": "#8fe0a6", "grassHigh": "#2fa585", "verge": "#e6f8ec", "hemiGround": "#5fbf8f",
+      "road": "#5a5f7a", "roadEdge": "#ffffff", "roadDash": "#ffd166",
+      "walls": ["#ffffff", "#f6f3ff", "#eef7ff", "#fff6ef", "#f2fbf6"],
+      "roofs": ["#ff7a8a", "#3d4466", "#7c5cff", "#2ec4b6", "#ffb547"],
+      "accents": ["#c98b5b", "#ff5fa2", "#22d3ee", "#3d4466"],
+      "trees": ["#3fbf8a", "#5fd39a", "#ffd166", "#ff9ec4"],
+      "pines": ["#1f9d8b", "#35b79c"], "trunk": "#7a5c4d",
+      "fields": [["#ffe08a", "#ffc94d"], ["#c9b8ff", "#9f88ff"]],
+      "water": "#45c7e6", "signBg": "#12162b",
+      "signColors": ["#7c5cff", "#22d3ee", "#34d399", "#ffb547", "#ff5fa2", "#c053ff"],
+      "lamp": "#5ef2ff", "lampBase": 0.3, "windowBase": 0, "firefly": "#bdfcff",
+      "bike": { "frame": "#7c5cff", "shirt": "#ff5fa2", "pants": "#2b2f45", "helmet": "#ffffff", "basket": "#22d3ee", "scarf": "#22d3ee" },
+      "landmark": { "dark": "#2b2f45", "roof": "#7c5cff", "accent": "#ff5fa2" }
+    }
+  },
+
+  "sunset": {
+    "name": "Sunset",
+    "description": "Warm coral, amber and rose; golden-hour village.",
+    "ui": {
+      "colorScheme": "dark",
+      "bg": "#140b0a", "bg2": "#2a130f",
+      "glass": "rgba(28, 14, 12, 0.62)", "glassStrong": "rgba(28, 14, 12, 0.8)",
+      "fgRgb": "255 255 255", "shadowRgb": "20 6 4",
+      "text": "#fff5ef", "textSoft": "#e2c3b5", "textDim": "#a8877a",
+      "accent1": "#ff6b35", "accent2": "#ff3d68", "accent3": "#ffb627", "accent4": "#ffd29d",
+      "ok": "#7ed957", "okText": "#c9f5b5", "link": "#ffc59e", "heading2": "#ffd0b0", "dot": "#3a211b",
+      "fonts": { "display": "Sora", "body": "Inter", "mono": "JetBrains Mono" }
+    },
+    "book": {
+      "cover": ["#2a0d12", "#7a1f2b", "#ff3d68", "#ffb627"],
+      "paper": "#fffaf5", "paper2": "#fff3ea", "ink": "#2a1410", "soft": "#6e5048", "dim": "#a3857b", "line": "#f3e3d8"
+    },
+    "scene": {
+      "sky": [
+        { "at": 0.0, "top": "#6a8dff", "horizon": "#ffd1a1", "sun": "#ffd29d", "sunI": 1.9, "hemi": 1.0, "elev": 0.2 },
+        { "at": 0.35, "top": "#ff9966", "horizon": "#ffe2b8", "sun": "#fff1dc", "sunI": 2.4, "hemi": 1.1, "elev": 0.6 },
+        { "at": 0.7, "top": "#ff5e62", "horizon": "#ffc371", "sun": "#ffb36b", "sunI": 2.1, "hemi": 0.95, "elev": 0.28 },
+        { "at": 1.0, "top": "#2b1035", "horizon": "#c0392b", "sun": "#ff7a59", "sunI": 0.8, "hemi": 0.55, "elev": 0.05 }
+      ],
+      "grassLow": "#c8d96f", "grassHigh": "#8aa84b", "verge": "#f8ecd1", "hemiGround": "#a8b85a",
+      "road": "#4a3b36", "roadEdge": "#fff3e0", "roadDash": "#ffb627",
+      "walls": ["#fff7ef", "#ffe9d6", "#fff1e6", "#f9e4d4", "#ffffff"],
+      "roofs": ["#e4572e", "#a23e48", "#ff8c42", "#6b2d5c", "#f2a541"],
+      "accents": ["#c98b5b", "#ff3d68", "#ffb627", "#6b2d5c"],
+      "trees": ["#9cbf4a", "#b5d16a", "#ff8c42", "#f2c14e"],
+      "pines": ["#5f8f3e", "#7aa64e"], "trunk": "#6e4b3a",
+      "fields": [["#ffd166", "#f4a261"], ["#e76f51", "#d1495b"]],
+      "water": "#5fb7c8", "signBg": "#2a1410",
+      "signColors": ["#ff6b35", "#ff3d68", "#ffb627", "#f4a261", "#e76f51", "#ffd29d"],
+      "lamp": "#ffb347", "lampBase": 0.3, "windowBase": 0, "firefly": "#ffe2a8",
+      "bike": { "frame": "#ff3d68", "shirt": "#ffb627", "pants": "#3b2a2a", "helmet": "#ffffff", "basket": "#ff6b35", "scarf": "#ffd29d" },
+      "landmark": { "dark": "#3b2a2a", "roof": "#ff6b35", "accent": "#ff3d68" }
+    }
+  },
+
+  "ocean": {
+    "name": "Ocean",
+    "description": "Deep navy glass with sky blue and teal; seaside village.",
+    "ui": {
+      "colorScheme": "dark",
+      "bg": "#04121c", "bg2": "#0b2a3d",
+      "glass": "rgba(6, 24, 36, 0.6)", "glassStrong": "rgba(6, 24, 36, 0.8)",
+      "fgRgb": "255 255 255", "shadowRgb": "2 10 16",
+      "text": "#eefbff", "textSoft": "#a9cfdc", "textDim": "#6f97a6",
+      "accent1": "#0ea5e9", "accent2": "#06b6d4", "accent3": "#2dd4bf", "accent4": "#a5f3fc",
+      "ok": "#34d399", "okText": "#a7f3d0", "link": "#9be7ff", "heading2": "#b5f1ff", "dot": "#12384a",
+      "fonts": { "display": "Outfit", "body": "Inter", "mono": "JetBrains Mono" }
+    },
+    "book": {
+      "cover": ["#03203a", "#075985", "#0ea5e9", "#2dd4bf"],
+      "paper": "#ffffff", "paper2": "#f3fbfd", "ink": "#06202c", "soft": "#4b6b78", "dim": "#86a4af", "line": "#e1eff4"
+    },
+    "scene": {
+      "sky": [
+        { "at": 0.0, "top": "#5fb0ff", "horizon": "#d6f4ff", "sun": "#fff4d6", "sunI": 1.9, "hemi": 1.0, "elev": 0.22 },
+        { "at": 0.35, "top": "#1e90ff", "horizon": "#c8f1ff", "sun": "#ffffff", "sunI": 2.5, "hemi": 1.15, "elev": 0.75 },
+        { "at": 0.7, "top": "#3a6fd8", "horizon": "#9fe6e0", "sun": "#ffe5b0", "sunI": 2.1, "hemi": 0.95, "elev": 0.32 },
+        { "at": 1.0, "top": "#031b34", "horizon": "#0e5f76", "sun": "#7ef9ff", "sunI": 0.75, "hemi": 0.55, "elev": 0.06 }
+      ],
+      "grassLow": "#9ee6c9", "grassHigh": "#3aa89a", "verge": "#e8faf5", "hemiGround": "#4fbfae",
+      "road": "#3f566b", "roadEdge": "#f2fbff", "roadDash": "#7ef9ff",
+      "walls": ["#ffffff", "#effaff", "#f4fbff", "#eaf6f6", "#fafdff"],
+      "roofs": ["#0ea5e9", "#1e3a5f", "#2dd4bf", "#38bdf8", "#f97316"],
+      "accents": ["#c98b5b", "#0ea5e9", "#f97316", "#1e3a5f"],
+      "trees": ["#2fb39a", "#56cfb2", "#7dd3fc", "#fde68a"],
+      "pines": ["#0f766e", "#14998a"], "trunk": "#6b5a4e",
+      "fields": [["#bae6fd", "#7dd3fc"], ["#99f6e4", "#5eead4"]],
+      "water": "#22b8d9", "signBg": "#06202c",
+      "signColors": ["#0ea5e9", "#2dd4bf", "#38bdf8", "#a5f3fc", "#06b6d4", "#f97316"],
+      "lamp": "#7ef9ff", "lampBase": 0.3, "windowBase": 0, "firefly": "#c9fbff",
+      "bike": { "frame": "#0ea5e9", "shirt": "#f97316", "pants": "#1e3a5f", "helmet": "#ffffff", "basket": "#2dd4bf", "scarf": "#a5f3fc" },
+      "landmark": { "dark": "#1e3a5f", "roof": "#0ea5e9", "accent": "#f97316" }
+    }
+  },
+
+  "forest": {
+    "name": "Forest",
+    "description": "Evergreen glass with emerald, lime and gold; lush woodland village.",
+    "ui": {
+      "colorScheme": "dark",
+      "bg": "#07120c", "bg2": "#10281a",
+      "glass": "rgba(10, 26, 17, 0.62)", "glassStrong": "rgba(10, 26, 17, 0.8)",
+      "fgRgb": "255 255 255", "shadowRgb": "3 12 6",
+      "text": "#f1fbf4", "textSoft": "#b5d4c0", "textDim": "#7c9b87",
+      "accent1": "#22c55e", "accent2": "#84cc16", "accent3": "#facc15", "accent4": "#a7f3d0",
+      "ok": "#4ade80", "okText": "#bbf7d0", "link": "#bef264", "heading2": "#d9f99d", "dot": "#1c3a28",
+      "fonts": { "display": "Manrope", "body": "Inter", "mono": "JetBrains Mono" }
+    },
+    "book": {
+      "cover": ["#052e16", "#14532d", "#22c55e", "#84cc16"],
+      "paper": "#fffef9", "paper2": "#f6faf1", "ink": "#0c1f14", "soft": "#4f6656", "dim": "#8aa293", "line": "#e6efe3"
+    },
+    "scene": {
+      "sky": [
+        { "at": 0.0, "top": "#8ec5ff", "horizon": "#fff2d1", "sun": "#ffe6a8", "sunI": 1.9, "hemi": 1.0, "elev": 0.22 },
+        { "at": 0.35, "top": "#4aa3ff", "horizon": "#e0f6ff", "sun": "#ffffff", "sunI": 2.5, "hemi": 1.15, "elev": 0.75 },
+        { "at": 0.7, "top": "#6b8cff", "horizon": "#ffd59a", "sun": "#ffc773", "sunI": 2.1, "hemi": 0.95, "elev": 0.32 },
+        { "at": 1.0, "top": "#0b1d2a", "horizon": "#2f5d50", "sun": "#ffd166", "sunI": 0.75, "hemi": 0.55, "elev": 0.06 }
+      ],
+      "grassLow": "#9fd86b", "grassHigh": "#3f8f3a", "verge": "#eef7dc", "hemiGround": "#5f9f45",
+      "road": "#6b5a48", "roadEdge": "#f6efe2", "roadDash": "#facc15",
+      "walls": ["#fffdf5", "#f6f1e7", "#ffffff", "#efe8da", "#f9f6ee"],
+      "roofs": ["#3f6212", "#b45309", "#166534", "#78350f", "#facc15"],
+      "accents": ["#a16207", "#22c55e", "#b45309", "#3f6212"],
+      "trees": ["#2f8f3a", "#4caf50", "#facc15", "#f97316"],
+      "pines": ["#14532d", "#1f7a3e"], "trunk": "#5b4334",
+      "fields": [["#fde68a", "#facc15"], ["#bef264", "#84cc16"]],
+      "water": "#4fb3bf", "signBg": "#0c1f14",
+      "signColors": ["#22c55e", "#84cc16", "#facc15", "#4ade80", "#a3e635", "#f97316"],
+      "lamp": "#ffd166", "lampBase": 0.3, "windowBase": 0, "firefly": "#fff3a3",
+      "bike": { "frame": "#16a34a", "shirt": "#facc15", "pants": "#1f2d24", "helmet": "#ffffff", "basket": "#a16207", "scarf": "#84cc16" },
+      "landmark": { "dark": "#14532d", "roof": "#16a34a", "accent": "#dc2626" }
+    }
+  },
+
+  "minimal": {
+    "name": "Minimal Light",
+    "description": "Clean light theme: white glass, ink-black and indigo; soft neutral village.",
+    "ui": {
+      "colorScheme": "light",
+      "bg": "#f5f6fa", "bg2": "#e9ebf3",
+      "glass": "rgba(255, 255, 255, 0.74)", "glassStrong": "rgba(255, 255, 255, 0.9)",
+      "fgRgb": "15 18 34", "shadowRgb": "20 24 40",
+      "text": "#0f1222", "textSoft": "#4b5168", "textDim": "#80869c",
+      "accent1": "#111827", "accent2": "#4f46e5", "accent3": "#6366f1", "accent4": "#0ea5e9",
+      "ok": "#16a34a", "okText": "#166534", "link": "#4f46e5", "heading2": "#4f46e5", "dot": "#d6d9e4",
+      "fonts": { "display": "Plus Jakarta Sans", "body": "Inter", "mono": "JetBrains Mono" }
+    },
+    "book": {
+      "cover": ["#0f1222", "#1f2937", "#374151", "#4f46e5"],
+      "paper": "#ffffff", "paper2": "#f8f9fc", "ink": "#0f1222", "soft": "#525870", "dim": "#8b90a5", "line": "#eceef4"
+    },
+    "scene": {
+      "sky": [
+        { "at": 0.0, "top": "#c7d2fe", "horizon": "#f8fafc", "sun": "#ffffff", "sunI": 1.9, "hemi": 1.05, "elev": 0.25 },
+        { "at": 0.35, "top": "#93c5fd", "horizon": "#f1f5f9", "sun": "#ffffff", "sunI": 2.4, "hemi": 1.2, "elev": 0.75 },
+        { "at": 0.7, "top": "#a5b4fc", "horizon": "#fde2e4", "sun": "#ffe4c4", "sunI": 2.0, "hemi": 1.0, "elev": 0.32 },
+        { "at": 1.0, "top": "#1e1b4b", "horizon": "#64748b", "sun": "#c7d2fe", "sunI": 0.8, "hemi": 0.6, "elev": 0.06 }
+      ],
+      "grassLow": "#d9f2e3", "grassHigh": "#94c9a9", "verge": "#f8fafc", "hemiGround": "#b9d8c4",
+      "road": "#2b2f3a", "roadEdge": "#ffffff", "roadDash": "#ffffff",
+      "walls": ["#ffffff", "#fafafa", "#f4f5f8", "#ffffff", "#f7f7fb"],
+      "roofs": ["#111827", "#4f46e5", "#9ca3af", "#1f2937", "#e5e7eb"],
+      "accents": ["#c98b5b", "#4f46e5", "#111827", "#9ca3af"],
+      "trees": ["#86c7a0", "#a7d7b8", "#e5e7eb", "#c7d2fe"],
+      "pines": ["#4b8f6b", "#6aa985"], "trunk": "#7c6f64",
+      "fields": [["#e5e7eb", "#d1d5db"], ["#e0e7ff", "#c7d2fe"]],
+      "water": "#93c5fd", "signBg": "#111827",
+      "signColors": ["#4f46e5", "#6366f1", "#0ea5e9", "#9ca3af", "#4f46e5", "#111827"],
+      "lamp": "#e0e7ff", "lampBase": 0.3, "windowBase": 0, "firefly": "#e0e7ff",
+      "bike": { "frame": "#111827", "shirt": "#4f46e5", "pants": "#374151", "helmet": "#ffffff", "basket": "#e5e7eb", "scarf": "#6366f1" },
+      "landmark": { "dark": "#111827", "roof": "#111827", "accent": "#4f46e5" }
+    }
+  },
+
+  "neon": {
+    "name": "Neon Night",
+    "description": "Cyberpunk magenta, cyan and electric yellow; a glowing night-time village.",
+    "ui": {
+      "colorScheme": "dark",
+      "bg": "#05010d", "bg2": "#1a0533",
+      "glass": "rgba(12, 4, 26, 0.6)", "glassStrong": "rgba(12, 4, 26, 0.82)",
+      "fgRgb": "255 255 255", "shadowRgb": "10 0 25",
+      "text": "#f8f0ff", "textSoft": "#c4b2e0", "textDim": "#8a76a8",
+      "accent1": "#ff00e5", "accent2": "#a100ff", "accent3": "#00f0ff", "accent4": "#faff00",
+      "ok": "#39ff14", "okText": "#b8ffad", "link": "#ff8cf3", "heading2": "#9ff8ff", "dot": "#2a1446",
+      "fonts": { "display": "Orbitron", "body": "Inter", "mono": "JetBrains Mono" }
+    },
+    "book": {
+      "cover": ["#0a0018", "#2d0a5e", "#a100ff", "#ff00e5"],
+      "paper": "#120a24", "paper2": "#0c061a", "ink": "#f5ecff", "soft": "#b9a6d6", "dim": "#7e6a9c", "line": "#2a1a44"
+    },
+    "scene": {
+      "sky": [
+        { "at": 0.0, "top": "#2b0a5e", "horizon": "#ff4fd8", "sun": "#ff9df2", "sunI": 1.4, "hemi": 0.8, "elev": 0.18 },
+        { "at": 0.35, "top": "#3a0ca3", "horizon": "#ff7ae0", "sun": "#ffd6fb", "sunI": 1.7, "hemi": 0.9, "elev": 0.45 },
+        { "at": 0.7, "top": "#240046", "horizon": "#ff006e", "sun": "#ff8fab", "sunI": 1.3, "hemi": 0.7, "elev": 0.2 },
+        { "at": 1.0, "top": "#05010d", "horizon": "#3c096c", "sun": "#00f0ff", "sunI": 0.6, "hemi": 0.45, "elev": 0.06 }
+      ],
+      "grassLow": "#6b4bd1", "grassHigh": "#2a145e", "verge": "#9b7cf0", "hemiGround": "#3c1a7a",
+      "road": "#140a26", "roadEdge": "#00f0ff", "roadDash": "#ff00e5",
+      "walls": ["#1a1033", "#24124a", "#2d1b5a", "#1f1640", "#2a1850"],
+      "roofs": ["#ff00e5", "#00f0ff", "#a100ff", "#faff00", "#ff006e"],
+      "accents": ["#00f0ff", "#ff00e5", "#faff00", "#39ff14"],
+      "trees": ["#7b2cbf", "#9d4edd", "#ff00e5", "#00f0ff"],
+      "pines": ["#3c096c", "#5a189a"], "trunk": "#2a1446",
+      "fields": [["#ff00e5", "#a100ff"], ["#00f0ff", "#0077ff"]],
+      "water": "#00f0ff", "signBg": "#0a0018",
+      "signColors": ["#ff00e5", "#00f0ff", "#faff00", "#39ff14", "#a100ff", "#ff006e"],
+      "lamp": "#00f0ff", "lampBase": 1.5, "windowBase": 0.9, "firefly": "#ff9df2",
+      "bike": { "frame": "#00f0ff", "shirt": "#ff00e5", "pants": "#1a1033", "helmet": "#faff00", "basket": "#a100ff", "scarf": "#39ff14" },
+      "landmark": { "dark": "#1a1033", "roof": "#ff00e5", "accent": "#00f0ff" }
+    }
+  }
+}

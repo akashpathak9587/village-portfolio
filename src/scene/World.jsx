@@ -2,6 +2,10 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { SAMPLES, curve, distToRoad, journey, progressToT, rng, sideAt, terrainHeight } from './path';
+import { theme } from '../config';
+
+/** Scene palette from the active theme (src/config/themes.json → scene). */
+const S = theme.scene;
 
 /* ------------------------------------------------------------------ */
 /* Terrain + road                                                      */
@@ -14,9 +18,9 @@ function Terrain() {
     g.translate(0, 0, -120);
     const pos = g.attributes.position;
     const colors = new Float32Array(pos.count * 3);
-    const grassLow = new THREE.Color('#8fe0a6');
-    const grassHigh = new THREE.Color('#2fa585');
-    const verge = new THREE.Color('#e6f8ec');
+    const grassLow = new THREE.Color(S.grassLow);
+    const grassHigh = new THREE.Color(S.grassHigh);
+    const verge = new THREE.Color(S.verge);
     const c = new THREE.Color();
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
@@ -72,17 +76,17 @@ function Road() {
     cv.width = 64;
     cv.height = 256;
     const ctx = cv.getContext('2d');
-    ctx.fillStyle = '#5a5f7a';
+    ctx.fillStyle = S.road;
     ctx.fillRect(0, 0, 64, 256);
     const r = rng(7);
     for (let i = 0; i < 400; i++) {
       ctx.fillStyle = r() > 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
       ctx.fillRect(r() * 64, r() * 256, 1 + r() * 2, 1 + r() * 2);
     }
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillStyle = S.roadEdge;
     ctx.fillRect(3, 0, 3, 256);
     ctx.fillRect(58, 0, 3, 256);
-    ctx.fillStyle = '#ffd166';
+    ctx.fillStyle = S.roadDash;
     for (let y = 0; y < 256; y += 64) ctx.fillRect(30, y, 4, 34);
     const tex = new THREE.CanvasTexture(cv);
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -140,9 +144,9 @@ function useVillageLayout(milestoneTs) {
 
     const free = (x, z, rad) => reserved.every(([rx, rz, rr]) => (rx - x) ** 2 + (rz - z) ** 2 > (rr + rad) ** 2);
 
-    const wallColors = ['#ffffff', '#f6f3ff', '#eef7ff', '#fff6ef', '#f2fbf6'];
-    const roofColors = ['#ff7a8a', '#3d4466', '#7c5cff', '#2ec4b6', '#ffb547'];
-    const accentColors = ['#c98b5b', '#ff5fa2', '#22d3ee', '#3d4466'];
+    const wallColors = S.walls;
+    const roofColors = S.roofs;
+    const accentColors = S.accents;
     let guard = 0;
     while (houses.length < 26 && guard++ < 2000) {
       const t = 0.02 + r() * 0.96;
@@ -222,12 +226,12 @@ function InstancedTrees({ pines, rounds }) {
       m.rotation.set(0, t.hue * 6, 0);
       m.updateMatrix();
       pineRef.current.setMatrixAt(i, m.matrix);
-      pineRef.current.setColorAt(i, c.set('#1f9d8b').offsetHSL(0, 0, (t.hue - 0.5) * 0.08));
+      pineRef.current.setColorAt(i, c.set(S.pines[0]).offsetHSL(0, 0, (t.hue - 0.5) * 0.08));
       m.position.y = t.y + 2.6 * t.s;
       m.scale.setScalar(t.s * 0.72);
       m.updateMatrix();
       pineTopRef.current.setMatrixAt(i, m.matrix);
-      pineTopRef.current.setColorAt(i, c.set('#35b79c').offsetHSL(0, 0, (t.hue - 0.5) * 0.08));
+      pineTopRef.current.setColorAt(i, c.set(S.pines[1]).offsetHSL(0, 0, (t.hue - 0.5) * 0.08));
     });
     rounds.forEach((t, i) => {
       m.position.set(t.x, t.y + 1.9 * t.s, t.z);
@@ -236,7 +240,7 @@ function InstancedTrees({ pines, rounds }) {
       m.updateMatrix();
       roundRef.current.setMatrixAt(i, m.matrix);
       // Mostly mint greens, with cherry-blossom pinks and a few sunny yellows.
-      const tone = t.hue > 0.86 ? '#ff9ec4' : t.hue > 0.78 ? '#ffd166' : t.hue > 0.4 ? '#5fd39a' : '#3fbf8a';
+      const tone = t.hue > 0.86 ? S.trees[3] : t.hue > 0.78 ? S.trees[2] : t.hue > 0.4 ? S.trees[1] : S.trees[0];
       roundRef.current.setColorAt(i, c.set(tone).offsetHSL(0, 0, (t.hue - 0.5) * 0.06));
     });
     [...pines, ...rounds].forEach((t, i) => {
@@ -256,7 +260,7 @@ function InstancedTrees({ pines, rounds }) {
     <>
       <instancedMesh ref={trunkRef} args={[null, null, pines.length + rounds.length]} castShadow>
         <cylinderGeometry args={[0.1, 0.15, 1, 10]} />
-        <meshStandardMaterial color="#7a5c4d" roughness={0.9} />
+        <meshStandardMaterial color={S.trunk} roughness={0.9} />
       </instancedMesh>
       <instancedMesh ref={pineRef} args={[null, null, pines.length]} castShadow>
         <coneGeometry args={[0.95, 2.4, 20]} />
@@ -324,7 +328,7 @@ function Fields({ fields }) {
       tex.colorSpace = THREE.SRGBColorSpace;
       return tex;
     };
-    return { gold: make('#ffe08a', '#ffc94d'), green: make('#c9b8ff', '#9f88ff') };
+    return { gold: make(...S.fields[0]), green: make(...S.fields[1]) };
   }, []);
   return fields.map((f, i) => (
     <mesh key={i} position={[f.x, f.y, f.z]} rotation={[-Math.PI / 2, 0, f.rot]} receiveShadow>
@@ -343,12 +347,12 @@ function drawLabel(cv, text, color) {
   const W = cv.width;
   const H = cv.height;
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#12162b';
+  ctx.fillStyle = S.signBg;
   ctx.fillRect(0, 0, W, H);
   // Accent bar + soft glow
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, color);
-  g.addColorStop(1, '#ff5fa2');
+  g.addColorStop(1, S.landmark.accent);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 18, H);
   const glow = ctx.createRadialGradient(W * 0.85, 0, 0, W * 0.85, 0, W * 0.6);
@@ -400,7 +404,7 @@ function Signpost({ t, label, color, side }) {
       </mesh>
       <mesh position={[0, 2.25, 0]} castShadow>
         <boxGeometry args={[2.4, 0.86, 0.1]} />
-        <meshStandardMaterial color="#12162b" roughness={0.4} />
+        <meshStandardMaterial color={S.signBg} roughness={0.4} />
       </mesh>
       <mesh position={[0, 2.25, 0.051]}>
         <planeGeometry args={[2.4, 0.86]} />
@@ -432,7 +436,7 @@ function WindTurbine({ position, rotation = 0 }) {
       <group ref={rotor} position={[0, 9.1, 0.9]}>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <coneGeometry args={[0.24, 0.5, 20]} />
-          <meshStandardMaterial color="#7c5cff" roughness={0.4} />
+          <meshStandardMaterial color={S.landmark.roof} roughness={0.4} />
         </mesh>
         {[0, 1, 2].map((i) => (
           <group key={i} rotation={[0, 0, (i * Math.PI * 2) / 3]}>
@@ -442,7 +446,7 @@ function WindTurbine({ position, rotation = 0 }) {
             </mesh>
             <mesh position={[0, 4.9, 0.005]}>
               <boxGeometry args={[0.2, 0.5, 0.065]} />
-              <meshStandardMaterial color="#ff5fa2" />
+              <meshStandardMaterial color={S.landmark.accent} />
             </mesh>
           </group>
         ))}
@@ -462,7 +466,7 @@ function Pond({ position }) {
     <group position={position}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.08, 0]} scale={[1, 0.7, 1]} receiveShadow>
         <circleGeometry args={[4.5, 32]} />
-        <meshStandardMaterial color="#45c7e6" roughness={0.08} metalness={0.25} />
+        <meshStandardMaterial color={S.water} roughness={0.08} metalness={0.25} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]} scale={[1, 0.7, 1]}>
         <ringGeometry args={[4.4, 5.1, 32]} />
@@ -492,7 +496,7 @@ function Barn({ position, rotation = 0 }) {
     <group position={position} rotation={[0, rotation, 0]}>
       <mesh position={[0, 2.6, 0]} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[3.1, 3.1, 5, 3]} />
-        <meshStandardMaterial color="#2b2f45" roughness={0.5} flatShading />
+        <meshStandardMaterial color={S.landmark.dark} roughness={0.5} flatShading />
       </mesh>
       <mesh position={[0, 1.65, 2.51]}>
         <circleGeometry args={[2.6, 3, Math.PI / 2 - Math.PI / 3, (Math.PI * 2) / 3]} />
@@ -505,7 +509,7 @@ function Barn({ position, rotation = 0 }) {
       {[0, 1, 2].map((i) => (
         <mesh key={i} position={[3.8 + i * 0.9, 0.45, 1.4 - i * 0.7]} castShadow>
           <sphereGeometry args={[0.45 + i * 0.08, 20, 16]} />
-          <meshStandardMaterial color={['#5fd39a', '#ff9ec4', '#3fbf8a'][i]} roughness={0.7} />
+          <meshStandardMaterial color={[S.trees[1], S.trees[3], S.trees[0]][i]} roughness={0.7} />
         </mesh>
       ))}
     </group>
@@ -521,7 +525,7 @@ function PostOffice({ position, rotation = 0 }) {
       </mesh>
       <mesh position={[0, 3.1, 0]} castShadow>
         <boxGeometry args={[4.9, 0.22, 3.9]} />
-        <meshStandardMaterial color="#7c5cff" roughness={0.45} />
+        <meshStandardMaterial color={S.landmark.roof} roughness={0.45} />
       </mesh>
       <mesh position={[0, 1.6, 1.71]}>
         <planeGeometry args={[3.2, 1.6]} />
@@ -529,11 +533,11 @@ function PostOffice({ position, rotation = 0 }) {
       </mesh>
       <mesh position={[2.9, 0.6, 1.4]} castShadow>
         <cylinderGeometry args={[0.3, 0.3, 1.2, 24]} />
-        <meshStandardMaterial color="#ff5fa2" roughness={0.4} />
+        <meshStandardMaterial color={S.landmark.accent} roughness={0.4} />
       </mesh>
       <mesh position={[2.9, 1.25, 1.4]}>
         <sphereGeometry args={[0.3, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial color="#ff5fa2" roughness={0.4} />
+        <meshStandardMaterial color={S.landmark.accent} roughness={0.4} />
       </mesh>
     </group>
   );
@@ -564,7 +568,7 @@ function Landmark({ kind, t, side, windowMat }) {
       return <PostOffice position={pos} rotation={rot} />;
     case 'cottage':
       return (
-        <House x={pos[0]} y={pos[1]} z={pos[2]} rot={rot} w={4.2} d={3.2} h={2.6} wall="#ffffff" roof="#7c5cff" accent="#ff5fa2" style="flat" windowMat={windowMat} />
+        <House x={pos[0]} y={pos[1]} z={pos[2]} rot={rot} w={4.2} d={3.2} h={2.6} wall="#ffffff" roof={S.landmark.roof} accent={S.landmark.accent} style="flat" windowMat={windowMat} />
       );
     default:
       return null;
@@ -629,7 +633,7 @@ function Lanterns({ lanterns, bulbMat }) {
     <>
       <instancedMesh ref={posts} args={[null, null, lanterns.length]} castShadow>
         <cylinderGeometry args={[0.04, 0.05, 1.8, 10]} />
-        <meshStandardMaterial color="#2b2f45" metalness={0.5} roughness={0.35} />
+        <meshStandardMaterial color={S.landmark.dark} metalness={0.5} roughness={0.35} />
       </instancedMesh>
       <instancedMesh ref={bulbs} args={[null, null, lanterns.length]} material={bulbMat}>
         <sphereGeometry args={[0.13, 16, 12]} />
@@ -681,7 +685,7 @@ function Fireflies({ start }) {
   });
   return (
     <points ref={points} geometry={geometry}>
-      <pointsMaterial map={glow} color="#bdfcff" size={0.45} transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} />
+      <pointsMaterial map={glow} color={S.firefly} size={0.45} transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} />
     </points>
   );
 }
@@ -721,7 +725,7 @@ function Birds() {
 
 /* ------------------------------------------------------------------ */
 
-const SIGN_COLORS = ['#7c5cff', '#22d3ee', '#34d399', '#ffb547', '#ff5fa2', '#c053ff'];
+const SIGN_COLORS = S.signColors;
 
 export default function World({ milestones }) {
   const milestoneTs = useMemo(() => milestones.map((_, i) => progressToT(i / (milestones.length - 1))), [milestones]);
@@ -730,7 +734,7 @@ export default function World({ milestones }) {
   // Materials that react to the time of day.
   // Street lamps glow neon cyan after dark; windows warm up.
   const bulbMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#5ef2ff', emissiveIntensity: 0.3, toneMapped: false }),
+    () => new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: S.lamp, emissiveIntensity: S.lampBase, toneMapped: false }),
     [],
   );
   const windowMat = useMemo(
@@ -738,9 +742,10 @@ export default function World({ milestones }) {
     [],
   );
   useFrame(() => {
-    bulbMat.emissiveIntensity = 0.3 + journey.dusk * 3.5;
-    windowMat.emissiveIntensity = journey.dusk * 1.6;
-    windowMat.color.set(journey.dusk > 0.3 ? '#ffe7b0' : '#9fd3ff');
+    bulbMat.emissiveIntensity = S.lampBase + journey.dusk * 3.5;
+    const glow = Math.max(S.windowBase, journey.dusk * 1.6);
+    windowMat.emissiveIntensity = glow;
+    windowMat.color.set(glow > 0.45 ? '#ffe7b0' : '#9fd3ff');
   });
 
   return (

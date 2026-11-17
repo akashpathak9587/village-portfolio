@@ -1,7 +1,7 @@
 import { Component, useEffect, useLayoutEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import VillageJourney from './scene/VillageJourney';
-import { milestones, profile } from './data/profile';
+import { milestones, profile } from './config';
 import RouteBar from './components/RouteBar';
 import Sections from './components/Sections';
 import useJourneyScroll from './components/useJourneyScroll';

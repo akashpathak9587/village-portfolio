@@ -44,9 +44,9 @@ npm install
 npm run dev            # → http://localhost:5173
 ```
 
-1. **Edit `src/data/profile.js`.** Name, role, about text, skills, experience, projects and contact links all live there.
+1. **Edit `src/config/portfolio.json`.** All your content lives there. Set `"mode"` to `"job"` or `"freelancer"`, and `"theme"` to one of the themes in `src/config/themes.json` (see the README's Configuration section).
 2. **Add your résumé** as `public/resume.pdf`, or set `resumeUrl: null` to hide the buttons.
-3. Optional: change the signpost text in the `milestones` array at the bottom of the same file.
+3. Optional: change which stops appear (and their order) with the `sections` list in the `job` / `freelancer` block.
 
 Check the production build:
 
@@ -59,7 +59,8 @@ npm run build && npm run preview   # → http://localhost:4173
 ```
 village-portfolio/
 ├── src/
-│   ├── data/profile.js          ← your content (edit me)
+│   ├── config/portfolio.json    ← your content, mode and theme (edit me)
+│   ├── config/themes.json       ← theme presets
 │   ├── scene/                   ← Three.js world (react-three-fiber)
 │   │   ├── VillageJourney.jsx   camera, lights, day→dusk sky
 │   │   ├── Bicycle.jsx          rider + bike with pedalling IK
@@ -303,7 +304,7 @@ sudo systemctl reload caddy
 
 ### Update the content
 
-Edit `src/data/profile.js` → `git commit` → `git push`. Jenkins redeploys in about 2 minutes.
+Edit `src/config/portfolio.json` → `git commit` → `git push`. Jenkins redeploys in about 2 minutes.
 
 ### Roll back
 

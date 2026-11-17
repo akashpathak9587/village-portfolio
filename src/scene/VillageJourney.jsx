@@ -4,14 +4,10 @@ import * as THREE from 'three';
 import Bicycle from './Bicycle';
 import World from './World';
 import { curve, journey, progressToT, sideAt } from './path';
+import { theme } from '../config';
 
 // Modern pastel day cycle: pink dawn → clear blue day → peach golden hour → violet neon night.
-const SKY = [
-  { at: 0.0, top: '#7fb2ff', horizon: '#ffd3e2', sun: '#ffd9b8', sunI: 1.9, hemi: 1.0, elev: 0.22 },
-  { at: 0.35, top: '#3f8cff', horizon: '#cfeeff', sun: '#ffffff', sunI: 2.5, hemi: 1.15, elev: 0.75 },
-  { at: 0.7, top: '#6a6dff', horizon: '#ffc1a6', sun: '#ffc08a', sunI: 2.1, hemi: 0.95, elev: 0.32 },
-  { at: 1.0, top: '#120d35', horizon: '#6b3fa0', sun: '#ff7ab6', sunI: 0.75, hemi: 0.55, elev: 0.06 },
-];
+const SKY = theme.scene.sky;
 
 const cA = new THREE.Color();
 const cB = new THREE.Color();
@@ -108,8 +104,8 @@ export default function VillageJourney({ milestones, reducedMotion }) {
         depthWrite: false,
         fog: false,
         uniforms: {
-          top: { value: new THREE.Color('#7fb2ff') },
-          horizon: { value: new THREE.Color('#ffd3e2') },
+          top: { value: new THREE.Color(SKY[0].top) },
+          horizon: { value: new THREE.Color(SKY[0].horizon) },
         },
         vertexShader: /* glsl */ `
           varying vec3 vDir;
@@ -213,9 +209,9 @@ export default function VillageJourney({ milestones, reducedMotion }) {
 
   return (
     <>
-      <fog attach="fog" args={['#ffd3e2', 60, 200]} />
+      <fog attach="fog" args={[SKY[0].horizon, 60, 200]} />
       <SkyDome material={skyMat} />
-      <hemisphereLight ref={hemi} args={['#ffffff', '#5fbf8f', 1]} />
+      <hemisphereLight ref={hemi} args={['#ffffff', theme.scene.hemiGround, 1]} />
       <primitive object={sun} />
       <primitive object={sun.target} />
       <sprite ref={sunGlow} scale={[60, 60, 1]}>

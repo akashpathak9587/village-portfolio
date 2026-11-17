@@ -142,10 +142,16 @@ function TheEnd({ profile, number }) {
       <Ink i={0} className="end__orb" aria-hidden="true" />
       <Ink i={1} as="h2" className="page__title page__title--big">Thanks for reading.</Ink>
       <Ink i={2} as="p" className="lede">
-        If you would like to talk about any of these chapters, or build the next one together, I would love to hear from you.
+        {profile.mode === 'freelancer'
+          ? 'Like what you see? Tell me about your project and let’s plan the next chapter together.'
+          : 'If you would like to talk about any of these chapters, or build the next one together, I would love to hear from you.'}
       </Ink>
       <Ink i={3} className="end__actions">
-        <a className="btn" href={`mailto:${profile.email}`}>✉ Email me</a>
+        {profile.mode === 'freelancer' && profile.primaryCta ? (
+          <a className="btn" href={profile.primaryCta.href}>{profile.primaryCta.label} →</a>
+        ) : (
+          <a className="btn" href={`mailto:${profile.email}`}>✉ Email me</a>
+        )}
         {profile.resumeUrl && (
           <a className="btn btn--light" href={profile.resumeUrl} download>Résumé ↓</a>
         )}

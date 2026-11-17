@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import TopTabs from '../components/TopTabs';
+import ThemePicker from '../components/ThemePicker';
 import useSmoothWheel from '../components/useSmoothWheel';
 import { buildPages, renderEndpaper } from './pages';
 import './book.css';
@@ -212,6 +213,7 @@ export default function ProjectBook({ profile, route, reducedMotion }) {
           <div style={{ width: `${(spread / L) * 100}%` }} />
         </div>
         <span className="bookbar__label">{label}</span>
+        <ThemePicker />
       </header>
 
       <div className="bookview__scroll" ref={wrapRef} style={{ height: `${total * 100}vh` }}>

@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { curve, curveLength, journey, placeTube, progressToT } from './path';
+import { theme } from '../config';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const WHEEL_R = 0.36;
@@ -22,16 +23,17 @@ const P = {
   shoulder: V(0, 1.47, 0.08),
 };
 
+const B = theme.scene.bike;
 const COLORS = {
-  frame: '#7c5cff',
+  frame: B.frame,
   tyre: '#1b1d2b',
   metal: '#d9dcec',
-  shirt: '#ff5fa2',
-  pants: '#2b2f45',
+  shirt: B.shirt,
+  pants: B.pants,
   skin: '#f1c27d',
-  helmet: '#ffffff',
-  basket: '#22d3ee',
-}
+  helmet: B.helmet,
+  basket: B.basket,
+};
 
 function Tube({ a, b, r = 0.025, color = COLORS.frame }) {
   const ref = useRef();
@@ -241,7 +243,7 @@ export default function Bicycle() {
           {/* Scarf trailing behind */}
           <mesh position={[0, 1.5, -0.08]} rotation={[0.9, 0, 0]} castShadow>
             <boxGeometry args={[0.08, 0.3, 0.02]} />
-            <meshStandardMaterial color="#22d3ee" />
+            <meshStandardMaterial color={B.scarf} />
           </mesh>
         </group>
       </group>
