@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { SAMPLES, curve, distToRoad, journey, progressToT, rng, sideAt, terrainHeight } from './path';
+import { SAMPLES, curve, curveLength, distToRoad, journey, progressToT, rng, sideAt, terrainHeight } from './path';
 import { theme } from '../config';
 
 /** Scene palette from the active theme (src/config/themes.json → scene). */
@@ -45,59 +45,202 @@ function Terrain() {
   );
 }
 
-function Road() {
-  const geometry = useMemo(() => {
-    const width = 1.5;
-    const verts = [];
-    const uvs = [];
-    const idx = [];
-    const side = new THREE.Vector3();
-    SAMPLES.forEach((p, i) => {
-      const t = i / (SAMPLES.length - 1);
-      sideAt(t, side);
-      verts.push(p.x - side.x * width, 0.04, p.z - side.z * width);
-      verts.push(p.x + side.x * width, 0.04, p.z + side.z * width);
-      uvs.push(0, t * 60, 1, t * 60);
-      if (i < SAMPLES.length - 1) {
-        const a = i * 2;
-        idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
-      }
-    });
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
-    g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-    g.setIndex(idx);
-    g.computeVertexNormals();
-    return g;
-  }, []);
+/* Bike path: textured lane, raised curbs, painted symbols, start/finish lines, round ends. */
+const ROAD_W = 1.35; // half-width of the lane
+const CURB_W = 0.14;
+const CURB_H = 0.06;
+const TILE_M = 16; // metres of road per texture repeat
 
-  const texture = useMemo(() => {
-    const cv = document.createElement('canvas');
-    cv.width = 64;
-    cv.height = 256;
-    const ctx = cv.getContext('2d');
-    ctx.fillStyle = S.road;
-    ctx.fillRect(0, 0, 64, 256);
-    const r = rng(7);
-    for (let i = 0; i < 400; i++) {
-      ctx.fillStyle = r() > 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
-      ctx.fillRect(r() * 64, r() * 256, 1 + r() * 2, 1 + r() * 2);
+/** Build a ribbon that follows the road between two lateral offsets. */
+function ribbon(inner, outer, yIn, yOut, vScale) {
+  const verts = [];
+  const uvs = [];
+  const idx = [];
+  const side = new THREE.Vector3();
+  const n = SAMPLES.length;
+  SAMPLES.forEach((p, i) => {
+    const t = i / (n - 1);
+    sideAt(t, side);
+    const v = (t * curveLength) / vScale;
+    verts.push(p.x + side.x * inner, yIn, p.z + side.z * inner);
+    verts.push(p.x + side.x * outer, yOut, p.z + side.z * outer);
+    uvs.push(0, v, 1, v);
+    if (i < n - 1) {
+      const a = i * 2;
+      idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
     }
-    ctx.fillStyle = S.roadEdge;
-    ctx.fillRect(3, 0, 3, 256);
-    ctx.fillRect(58, 0, 3, 256);
-    ctx.fillStyle = S.roadDash;
-    for (let y = 0; y < 256; y += 64) ctx.fillRect(30, y, 4, 34);
-    const tex = new THREE.CanvasTexture(cv);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.colorSpace = THREE.SRGBColorSpace;
-    return tex;
-  }, []);
+  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+
+function drawBikeSymbol(ctx, cx, cy, s, color) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-Math.PI / 2); // ride "up" the texture = forward along the road
+  ctx.strokeStyle = color;
+  ctx.lineWidth = s * 0.09;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  const r = s * 0.28;
+  ctx.beginPath();
+  ctx.arc(-s * 0.42, s * 0.2, r, 0, Math.PI * 2);
+  ctx.moveTo(s * 0.42 + r, s * 0.2);
+  ctx.arc(s * 0.42, s * 0.2, r, 0, Math.PI * 2);
+  ctx.moveTo(-s * 0.42, s * 0.2);
+  ctx.lineTo(-s * 0.08, -s * 0.25);
+  ctx.lineTo(s * 0.3, -s * 0.25);
+  ctx.lineTo(s * 0.42, s * 0.2);
+  ctx.moveTo(-s * 0.08, -s * 0.25);
+  ctx.lineTo(s * 0.02, s * 0.2);
+  ctx.lineTo(s * 0.3, -s * 0.25);
+  ctx.moveTo(-s * 0.16, -s * 0.36);
+  ctx.lineTo(0, -s * 0.36);
+  ctx.moveTo(s * 0.24, -s * 0.42);
+  ctx.lineTo(s * 0.38, -s * 0.42);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function makeRoadTexture(maxAniso) {
+  const W = 256;
+  const H = 2048; // one tile = TILE_M metres
+  const cv = document.createElement('canvas');
+  cv.width = W;
+  cv.height = H;
+  const ctx = cv.getContext('2d');
+  const pxPerM = H / TILE_M;
+
+  // Asphalt base with a soft centre sheen and fine aggregate speckle.
+  ctx.fillStyle = S.road;
+  ctx.fillRect(0, 0, W, H);
+  const sheen = ctx.createLinearGradient(0, 0, W, 0);
+  sheen.addColorStop(0, 'rgba(0,0,0,0.10)');
+  sheen.addColorStop(0.5, 'rgba(255,255,255,0.05)');
+  sheen.addColorStop(1, 'rgba(0,0,0,0.10)');
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, 0, W, H);
+  const r = rng(11);
+  for (let i = 0; i < 9000; i++) {
+    const a = r();
+    ctx.fillStyle = a > 0.5 ? `rgba(255,255,255,${0.03 + r() * 0.05})` : `rgba(0,0,0,${0.04 + r() * 0.06})`;
+    const sz = 1 + r() * 1.6;
+    ctx.fillRect(r() * W, r() * H, sz, sz);
+  }
+  // A few faint tyre-worn streaks.
+  ctx.fillStyle = 'rgba(0,0,0,0.06)';
+  ctx.fillRect(W * 0.28, 0, 10, H);
+  ctx.fillRect(W * 0.68, 0, 10, H);
+
+  // Solid edge lines, inset from the curbs.
+  ctx.fillStyle = S.roadEdge;
+  ctx.globalAlpha = 0.92;
+  ctx.fillRect(10, 0, 6, H);
+  ctx.fillRect(W - 16, 0, 6, H);
+
+  // Centre dashes: 2 m line, 2 m gap.
+  ctx.fillStyle = S.roadDash;
+  for (let y = 0; y < H; y += pxPerM * 4) ctx.fillRect(W / 2 - 3, y + pxPerM * 0.5, 6, pxPerM * 2);
+  ctx.globalAlpha = 1;
+
+  // Painted bike-lane symbols, one in each lane per tile.
+  drawBikeSymbol(ctx, W * 0.74, H * 0.3, 70, 'rgba(255,255,255,0.75)');
+  drawBikeSymbol(ctx, W * 0.26, H * 0.8, 70, 'rgba(255,255,255,0.75)');
+
+  const tex = new THREE.CanvasTexture(cv);
+  tex.wrapS = THREE.ClampToEdgeWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = maxAniso;
+  tex.generateMipmaps = true;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  return tex;
+}
+
+function makeCheckerTexture() {
+  const cv = document.createElement('canvas');
+  cv.width = 256;
+  cv.height = 32;
+  const ctx = cv.getContext('2d');
+  for (let x = 0; x < 16; x++)
+    for (let y = 0; y < 2; y++) {
+      ctx.fillStyle = (x + y) % 2 ? '#111318' : '#ffffff';
+      ctx.fillRect(x * 16, y * 16, 16, 16);
+    }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.magFilter = THREE.NearestFilter;
+  return tex;
+}
+
+/** Checkered line painted across the road at t. */
+function CrossLine({ t, texture }) {
+  const { position, rotation } = useMemo(() => {
+    const p = curve.getPointAt(t);
+    const tan = curve.getTangentAt(t);
+    return { position: [p.x, 0.055, p.z], rotation: Math.atan2(tan.x, tan.z) };
+  }, [t]);
+  return (
+    <mesh position={position} rotation={[-Math.PI / 2, 0, rotation]} receiveShadow>
+      <planeGeometry args={[ROAD_W * 2, 0.5]} />
+      <meshStandardMaterial map={texture} roughness={0.7} polygonOffset polygonOffsetFactor={-4} />
+    </mesh>
+  );
+}
+
+function Road() {
+  const { gl } = useThree();
+  const geo = useMemo(
+    () => ({
+      lane: ribbon(-ROAD_W, ROAD_W, 0.045, 0.045, TILE_M),
+      curbTopL: ribbon(-ROAD_W - CURB_W, -ROAD_W, CURB_H, CURB_H, 4),
+      curbTopR: ribbon(ROAD_W, ROAD_W + CURB_W, CURB_H, CURB_H, 4),
+      curbFaceL: ribbon(-ROAD_W, -ROAD_W, CURB_H, 0.02, 4),
+      curbFaceR: ribbon(ROAD_W, ROAD_W, 0.02, CURB_H, 4),
+      shoulderL: ribbon(-ROAD_W - CURB_W - 0.45, -ROAD_W - CURB_W, 0.03, 0.03, 4),
+      shoulderR: ribbon(ROAD_W + CURB_W, ROAD_W + CURB_W + 0.45, 0.03, 0.03, 4),
+    }),
+    [],
+  );
+  const tex = useMemo(() => makeRoadTexture(gl.capabilities.getMaxAnisotropy()), [gl]);
+  const checker = useMemo(makeCheckerTexture, []);
+  const curbMat = useMemo(() => new THREE.MeshStandardMaterial({ color: S.roadEdge, roughness: 0.6, side: THREE.DoubleSide }), []);
+  const shoulderMat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: new THREE.Color(S.verge).lerp(new THREE.Color(S.road), 0.25), roughness: 1 }),
+    [],
+  );
+  const capMat = useMemo(() => new THREE.MeshStandardMaterial({ color: S.road, roughness: 0.85 }), []);
+  const ends = useMemo(() => [curve.getPointAt(0), curve.getPointAt(1)], []);
 
   return (
-    <mesh geometry={geometry} receiveShadow>
-      <meshStandardMaterial map={texture} roughness={0.85} polygonOffset polygonOffsetFactor={-2} />
-    </mesh>
+    <group>
+      <mesh geometry={geo.lane} receiveShadow>
+        <meshStandardMaterial map={tex} roughness={0.82} metalness={0.02} polygonOffset polygonOffsetFactor={-2} />
+      </mesh>
+      {['curbTopL', 'curbTopR', 'curbFaceL', 'curbFaceR'].map((k) => (
+        <mesh key={k} geometry={geo[k]} material={curbMat} receiveShadow castShadow={k.startsWith('curbTop')} />
+      ))}
+      {['shoulderL', 'shoulderR'].map((k) => (
+        <mesh key={k} geometry={geo[k]} material={shoulderMat} receiveShadow />
+      ))}
+      {/* Rounded ends so the path doesn't just stop */}
+      {ends.map((p, i) => (
+        <group key={i} position={[p.x, 0, p.z]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.044, 0]} material={capMat} receiveShadow>
+            <circleGeometry args={[ROAD_W + 0.02, 40]} />
+          </mesh>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, CURB_H, 0]} material={curbMat}>
+            <ringGeometry args={[ROAD_W, ROAD_W + CURB_W, 40]} />
+          </mesh>
+        </group>
+      ))}
+      <CrossLine t={0.045} texture={checker} />
+      <CrossLine t={0.985} texture={checker} />
+    </group>
   );
 }
 
