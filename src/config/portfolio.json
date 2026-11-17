@@ -96,15 +96,9 @@
     {
       "name": "API Box",
       "icon": "🔌",
-      "category": "API Platform",
+      "category": "Integration Platform · API",
       "role": "Backend design and implementation",
-      "description": "A public API layer over the product suite, so third-party front ends can work with loan, customer and reporting data.",
-      "points": [
-        "REST APIs for loan, customer and reporting data.",
-        "Authentication, access control and per-client usage tracking.",
-        "Interactive documentation with Swagger UI / OpenAPI.",
-        "PostgreSQL data layer shared with the rest of the suite."
-      ],
+      "description": "An integration layer that connects our lending backend to clients' own front-end applications, so each client can build and manage its own customised UI on top of the platform.",
       "tech": [
         "Java 25",
         "Spring Boot",
@@ -112,21 +106,25 @@
         "PostgreSQL"
       ],
       "link": "",
-      "repo": ""
+      "repo": "",
+      "features": [
+        "REST APIs for loan, customer and reporting data",
+        "Authentication and access control for each client",
+        "Per-client usage tracking",
+        "Interactive Swagger UI / OpenAPI documentation"
+      ],
+      "improvements": [
+        "Opened the platform to client-built front ends, so clients run their own customised UI on our backend",
+        "Documented every endpoint with Swagger UI / OpenAPI for client developers",
+        "Upgraded the service to the latest Java 25 LTS"
+      ]
     },
     {
       "name": "Loan Management System",
       "icon": "📊",
       "category": "SaaS Platform · Full-stack",
       "role": "Full-stack: React front end and Spring Boot services",
-      "description": "The core SaaS product of a lending suite: loan lifecycle management, payments and receipts, rule-based validation, bulk jobs and dynamic reporting.",
-      "points": [
-        "Full loan lifecycle: EMI payments, receipts and restructuring flows.",
-        "A configurable validation engine for business and compliance rules.",
-        "Bulk processing for large batch operations.",
-        "Dynamic reports generated with SQL / PL-SQL.",
-        "React front end on top of Spring Boot services."
-      ],
+      "description": "The core product of a lending SaaS suite used by NBFCs. I delivered enhancements across the loan life cycle: repayments, receipts, restructuring, compliance checks and reporting.",
       "tech": [
         "Java 25",
         "Spring Boot",
@@ -135,7 +133,20 @@
         "PL/SQL"
       ],
       "link": "",
-      "repo": ""
+      "repo": "",
+      "features": [
+        "EMI payments, receipts and loan restructuring",
+        "Compliance validation engine",
+        "Bulk processing for large batch operations",
+        "Dynamic reports with SQL / PL-SQL"
+      ],
+      "improvements": [
+        "Automated NACH-based EMI clearance",
+        "Integrated six payment gateways (Easebuzz, Decentro, Razorpay, Juspay, PayU, Paytm) with real-time transaction status",
+        "Kafka event-driven repayment alerts based on CIBIL score, with WhatsApp / SMS reminders",
+        "Faster under heavy load with Redis caching and PostgreSQL query optimisation",
+        "Upgraded services from Java 21 to Java 25 LTS"
+      ]
     },
     {
       "name": "Collection App",
@@ -143,12 +154,6 @@
       "category": "Web + Mobile · Real-time",
       "role": "Full-stack: React UI and real-time backend",
       "description": "A field-operations app for agents on the move, with secure transactions and a live link back to the main platform.",
-      "points": [
-        "Secure transaction capture and customer verification.",
-        "Live location tracking for field agents.",
-        "Real-time sync with the core platform.",
-        "Works on both web and mobile."
-      ],
       "tech": [
         "React",
         "Java 25",
@@ -156,7 +161,18 @@
         "PostgreSQL"
       ],
       "link": "",
-      "repo": ""
+      "repo": "",
+      "features": [
+        "Secure transaction capture",
+        "Customer verification",
+        "Live location tracking for field agents",
+        "Real-time sync with the LMS, on web and mobile"
+      ],
+      "improvements": [
+        "Built live location tracking for field agents",
+        "Real-time sync so collections reach the LMS as they happen",
+        "Secure capture flow with customer verification on web and mobile"
+      ]
     },
     {
       "name": "DevOps CI/CD Pipeline",
@@ -164,12 +180,6 @@
       "category": "DevOps · Published research",
       "role": "Design, implementation and research paper",
       "description": "An automated build, test and deployment pipeline, written up and published as a research paper.",
-      "points": [
-        "Automated build, test and deployment on every commit.",
-        "Containerised builds with Docker on Linux.",
-        "Pipeline-as-code in Jenkins, driven by Git.",
-        "Findings published as a research paper."
-      ],
       "tech": [
         "Jenkins",
         "Docker",
@@ -177,7 +187,18 @@
         "Git"
       ],
       "link": "",
-      "repo": ""
+      "repo": "",
+      "features": [
+        "Automated build, test and deploy on every commit",
+        "Containerised builds with Docker on Linux",
+        "Pipeline-as-code in Jenkins, driven by Git"
+      ],
+      "improvements": [
+        "Deployed services on Kubernetes with HPA auto-scaling",
+        "Automated server setup and releases with Ansible",
+        "Deployment and test reports sent automatically to email and Google Chat",
+        "Published the work as a research paper"
+      ]
     },
     {
       "name": "Village Journey Portfolio",
@@ -185,13 +206,6 @@
       "category": "3D Web · Full-stack + DevOps",
       "role": "Design, front end and delivery pipeline",
       "description": "This site: a scroll-driven 3D bicycle ride and a page-turning Project Book, containerised with Docker, built by Jenkins and deployed with Ansible.",
-      "points": [
-        "Scroll-driven 3D world built with React, Vite and Three.js.",
-        "This page-turning Project Book, animated with CSS 3D transforms.",
-        "Multi-stage Docker image served by nginx.",
-        "Jenkins pipeline that builds, smoke-tests, pushes and deploys.",
-        "Ansible playbook that provisions the server and runs the container."
-      ],
       "tech": [
         "React",
         "Three.js",
@@ -200,7 +214,18 @@
         "Ansible"
       ],
       "link": "",
-      "repo": "https://github.com/akashpathak9587/village-portfolio"
+      "repo": "https://github.com/akashpathak9587/village-portfolio",
+      "features": [
+        "Scroll-driven 3D bike ride built with React, Vite and Three.js",
+        "Page-turning Project Book animated with CSS 3D transforms",
+        "Job / freelancer modes and six themes from one JSON config",
+        "Docker + nginx image, Jenkins pipeline and Ansible deploy"
+      ],
+      "improvements": [
+        "Inertial scrolling with a spring-damped bike and camera for a smooth ride",
+        "Detailed bike and rider models with lights that glow at dusk",
+        "Realistic bike path with curbs, markings and start / finish lines"
+      ]
     }
   ],
   "job": {

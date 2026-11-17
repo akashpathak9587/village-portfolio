@@ -3,7 +3,7 @@
    ================================================================ */
 
 .bookview {
-  --ph: calc(var(--pw) * 1.4);
+  --ph: calc(var(--pw) * var(--ratio, 1.4));
   position: relative;
   min-height: 100vh;
   color: var(--text);
@@ -93,7 +93,8 @@
   position: relative;
   width: calc(var(--pw) * 2);
   height: var(--ph);
-  font-size: calc(var(--pw) / 27);
+  /* Text scales with page height so content always fits the page. */
+  font-size: calc(var(--ph) / 40);
   font-family: var(--font-body);
   transform-origin: 50% 70%;
   /* Flat on purpose: each leaf is flattened and stacked by z-index (no z-fighting). */
@@ -563,6 +564,39 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--a3);
+}
+
+/* Key features: compact two-column list */
+.features {
+  list-style: none;
+  margin: 0 0 0.8em;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45em 1em;
+}
+.features li {
+  position: relative;
+  padding: 0.45em 0.7em 0.45em 1.5em;
+  border-radius: 0.6em;
+  background: color-mix(in srgb, var(--a1) 6%, var(--paper));
+  border: 1px solid var(--page-line);
+  font-size: 0.78em;
+  line-height: 1.35;
+  color: var(--page-ink);
+}
+.features li::before {
+  content: '';
+  position: absolute;
+  left: 0.6em;
+  top: 0.85em;
+  width: 0.45em;
+  height: 0.45em;
+  border-radius: 50%;
+  background: var(--grad);
+}
+.book--single .features {
+  grid-template-columns: 1fr;
 }
 
 /* Chapter detail */

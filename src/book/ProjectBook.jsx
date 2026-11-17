@@ -21,12 +21,17 @@ function useMedia(query) {
   return match;
 }
 
+/** Page height ÷ width. Wide, near-square pages on desktop; taller pages on phones. */
+const RATIO_SPREAD = 1.08;
+const RATIO_SINGLE = 1.42;
+
 function usePageWidth(single) {
   const calc = () => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const byHeight = (vh - 150) / 1.4;
-    return Math.round(single ? Math.min(440, vw - 32, byHeight) : Math.min(470, (vw - 96) / 2, byHeight));
+    const ratio = single ? RATIO_SINGLE : RATIO_SPREAD;
+    const byHeight = (vh - 150) / ratio;
+    return Math.round(single ? Math.min(460, vw - 32, byHeight) : Math.min(680, (vw - 64) / 2, byHeight));
   };
   const [w, setW] = useState(calc);
   useEffect(() => {
@@ -205,7 +210,7 @@ export default function ProjectBook({ profile, route, reducedMotion }) {
     spread === 0 ? 'Cover' : spread >= L ? 'The End' : single ? `Page ${spread} of ${pages.length - 1}` : `Spread ${spread} of ${L}`;
 
   return (
-    <div className="bookview" style={{ '--pw': `${pw}px` }}>
+    <div className="bookview" style={{ '--pw': `${pw}px`, '--ratio': single ? RATIO_SINGLE : RATIO_SPREAD }}>
       <div className="bookview__desk" aria-hidden="true" />
       <header className="bookbar">
         <TopTabs route={route} />

@@ -82,6 +82,7 @@ function Contents({ profile, number, goToProject }) {
 }
 
 function ChapterOpen({ project, index, number }) {
+  const features = project.features || project.points || [];
   return (
     <div className="page__body">
       <Folio number={number} running={`Chapter ${pad(index + 1)}`} />
@@ -94,7 +95,17 @@ function ChapterOpen({ project, index, number }) {
       <Ink i={2} as="p" className="chapter__category">{project.category}</Ink>
       <Ink i={3} as="h2" className="page__title">{project.name}</Ink>
       <Ink i={4} as="p" className="lede">{project.description}</Ink>
-      <Ink i={5} className="chapter__role">
+      {features.length > 0 && (
+        <>
+          <Ink i={5} as="h3" className="page__h3">Key features</Ink>
+          <ul className="features">
+            {features.map((f, k) => (
+              <Ink key={f} i={6 + k} as="li">{f}</Ink>
+            ))}
+          </ul>
+        </>
+      )}
+      <Ink i={7 + features.length} className="chapter__role">
         <span>My role</span>
         {project.role}
       </Ink>
@@ -103,23 +114,29 @@ function ChapterOpen({ project, index, number }) {
 }
 
 function ChapterDetail({ project, index, number }) {
+  const improvements = project.improvements || [];
+  const n = improvements.length;
   return (
     <div className="page__body">
       <Folio number={number} running={project.name} />
-      <Ink i={0} as="h3" className="page__h3">What I built</Ink>
-      <ul className="built">
-        {project.points.map((pt, k) => (
-          <Ink key={pt} i={1 + k} as="li">{pt}</Ink>
-        ))}
-      </ul>
-      <Ink i={2 + project.points.length} as="h3" className="page__h3">Tech stack</Ink>
-      <Ink i={3 + project.points.length} as="ul" className="stack">
+      {n > 0 && (
+        <>
+          <Ink i={0} as="h3" className="page__h3">Enhancements I delivered</Ink>
+          <ul className="built">
+            {improvements.map((pt, k) => (
+              <Ink key={pt} i={1 + k} as="li">{pt}</Ink>
+            ))}
+          </ul>
+        </>
+      )}
+      <Ink i={2 + n} as="h3" className="page__h3">Tech stack</Ink>
+      <Ink i={3 + n} as="ul" className="stack">
         {project.tech.map((t) => (
           <li key={t}>{t}</li>
         ))}
       </Ink>
       {(project.link || project.repo) && (
-        <Ink i={4 + project.points.length} className="page__links">
+        <Ink i={4 + n} className="page__links">
           {project.link && (
             <a href={project.link} target="_blank" rel="noreferrer">Live demo ↗</a>
           )}
@@ -128,7 +145,7 @@ function ChapterDetail({ project, index, number }) {
           )}
         </Ink>
       )}
-      <Ink i={6 + project.points.length} className="page__flourish" aria-hidden="true">
+      <Ink i={6 + n} className="page__flourish" aria-hidden="true">
         — End of chapter {pad(index + 1)} —
       </Ink>
     </div>
