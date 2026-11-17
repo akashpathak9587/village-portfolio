@@ -2,7 +2,6 @@
   "mode": "job",
   "theme": "aurora",
   "themeSwitcher": true,
-
   "profile": {
     "name": "Akash Pathak",
     "location": "Jaipur, India · open to relocate to Bengaluru",
@@ -10,25 +9,89 @@
     "phone": "+91 93528 78869",
     "resumeUrl": "/resume.pdf",
     "links": [
-      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/akash9587" },
-      { "label": "GitHub", "url": "https://github.com/akashpathak9587" }
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/akash9587"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/akashpathak9587"
+      }
     ]
   },
-
   "about": [
-    "Full-stack engineer with about 2 years of experience building web and mobile products end to end: React and Next.js front ends, Java 21 / Spring Boot and Node.js services, PostgreSQL, MongoDB and Redis data layers, and Docker, Kubernetes and Jenkins deployments.",
-    "I lead a frontend team while also owning backend services, so I am comfortable taking a feature from design document to UI, API, database and production. Strong in data structures, OOP and system design, quick to pick up new languages, and keen on AI-assisted development."
+    "I'm a product-minded full-stack engineer who enjoys turning rough ideas into products people rely on. I start with the problem and the user, shape a clear plan, and then own the build end to end: interface, APIs, data and the pipeline that ships it.",
+    "Over about 2 years I've led a frontend team while owning backend services across a seven-product SaaS suite, moved services to Java 25 LTS, and kept systems fast and stable under real load. I care about clean design documents, honest code reviews, quick feedback loops and fixing problems at the root, and I'm quick to pick up new tools, including AI-assisted development."
   ],
-
   "skills": [
-    { "group": "Frontend", "items": ["React", "Next.js", "Redux", "Material UI", "TypeScript", "JavaScript"] },
-    { "group": "Backend", "items": ["Java 21", "Spring Boot", "Node.js", "REST APIs", "Microservices", "OpenAPI"] },
-    { "group": "Data & Messaging", "items": ["PostgreSQL", "MongoDB", "Redis", "Kafka", "SQL / PL-SQL", "Query Optimization"] },
-    { "group": "DevOps", "items": ["Docker", "Kubernetes", "Jenkins", "Ansible", "CI/CD", "Grafana", "Linux"] },
-    { "group": "Cloud & Tools", "items": ["AWS S3", "Lambda", "EC2", "CloudFront", "Git", "Postman"] },
-    { "group": "Fundamentals", "items": ["Data Structures", "Algorithms", "OOP / SOLID", "Design Patterns", "System Design", "DB Design"] }
+    {
+      "group": "Frontend",
+      "items": [
+        "React",
+        "Next.js",
+        "Redux",
+        "Material UI",
+        "TypeScript",
+        "JavaScript"
+      ]
+    },
+    {
+      "group": "Backend",
+      "items": [
+        "Java 25",
+        "Spring Boot",
+        "Node.js",
+        "REST APIs",
+        "Microservices",
+        "OpenAPI"
+      ]
+    },
+    {
+      "group": "Data & Messaging",
+      "items": [
+        "PostgreSQL",
+        "MongoDB",
+        "Redis",
+        "Kafka",
+        "SQL / PL-SQL",
+        "Query Optimization"
+      ]
+    },
+    {
+      "group": "DevOps",
+      "items": [
+        "Docker",
+        "Kubernetes",
+        "Jenkins",
+        "Ansible",
+        "CI/CD",
+        "Grafana",
+        "Linux"
+      ]
+    },
+    {
+      "group": "Cloud & Tools",
+      "items": [
+        "AWS S3",
+        "Lambda",
+        "EC2",
+        "CloudFront",
+        "Git",
+        "Postman"
+      ]
+    },
+    {
+      "group": "Fundamentals",
+      "items": [
+        "Data Structures",
+        "Algorithms",
+        "OOP / SOLID",
+        "Design Patterns",
+        "System Design",
+        "DB Design"
+      ]
+    }
   ],
-
   "projects": [
     {
       "name": "API Box",
@@ -42,7 +105,12 @@
         "Interactive documentation with Swagger UI / OpenAPI.",
         "PostgreSQL data layer shared with the rest of the suite."
       ],
-      "tech": ["Java 21", "Spring Boot", "Swagger UI", "PostgreSQL"],
+      "tech": [
+        "Java 25",
+        "Spring Boot",
+        "Swagger UI",
+        "PostgreSQL"
+      ],
       "link": "",
       "repo": ""
     },
@@ -59,7 +127,13 @@
         "Dynamic reports generated with SQL / PL-SQL.",
         "React front end on top of Spring Boot services."
       ],
-      "tech": ["Java 21", "Spring Boot", "React", "PostgreSQL", "PL/SQL"],
+      "tech": [
+        "Java 25",
+        "Spring Boot",
+        "React",
+        "PostgreSQL",
+        "PL/SQL"
+      ],
       "link": "",
       "repo": ""
     },
@@ -75,7 +149,12 @@
         "Real-time sync with the core platform.",
         "Works on both web and mobile."
       ],
-      "tech": ["React", "Java 21", "Spring Boot", "PostgreSQL"],
+      "tech": [
+        "React",
+        "Java 25",
+        "Spring Boot",
+        "PostgreSQL"
+      ],
       "link": "",
       "repo": ""
     },
@@ -91,7 +170,12 @@
         "Pipeline-as-code in Jenkins, driven by Git.",
         "Findings published as a research paper."
       ],
-      "tech": ["Jenkins", "Docker", "Linux", "Git"],
+      "tech": [
+        "Jenkins",
+        "Docker",
+        "Linux",
+        "Git"
+      ],
       "link": "",
       "repo": ""
     },
@@ -108,35 +192,57 @@
         "Jenkins pipeline that builds, smoke-tests, pushes and deploys.",
         "Ansible playbook that provisions the server and runs the container."
       ],
-      "tech": ["React", "Three.js", "Docker", "Jenkins", "Ansible"],
+      "tech": [
+        "React",
+        "Three.js",
+        "Docker",
+        "Jenkins",
+        "Ansible"
+      ],
       "link": "",
       "repo": "https://github.com/akashpathak9587/village-portfolio"
     }
   ],
-
   "job": {
     "role": "Full-Stack Engineer",
     "badge": "Open to full-stack roles",
-    "tagline": "React · Next.js · Java Spring Boot · Node.js. I build products end to end, from the UI to the database to the deploy pipeline.",
-    "sections": ["about", "skills", "experience", "projects", "contact"],
+    "tagline": "I turn ideas into reliable, user-friendly products, owning the whole journey from problem and design to clean code, smooth releases and continuous improvement.",
+    "sections": [
+      "about",
+      "skills",
+      "experience",
+      "projects",
+      "contact"
+    ],
     "highlights": [
-      { "value": "2+", "label": "Years building end-to-end products" },
-      { "value": "7", "label": "Products in a multi-app SaaS suite" },
-      { "value": "Lead", "label": "Frontend team + backend ownership" }
+      {
+        "value": "2+",
+        "label": "Years building end-to-end products"
+      },
+      {
+        "value": "7",
+        "label": "Products in a multi-app SaaS suite"
+      },
+      {
+        "value": "Lead",
+        "label": "Frontend team + backend ownership"
+      }
     ],
     "experience": [
       {
         "company": "Synoriq R&D Pvt. Ltd., Jaipur",
-        "role": "Associate Software Engineer II (Frontend Lead)",
+        "role": "Associate Software Engineer III (Frontend Lead)",
         "period": "Sep 2024 — Present",
         "points": [
           "Lead the frontend team across a suite of seven web and mobile products (LMS, Collection App, Customer App, API Box, Insights, Admin), while owning backend services end to end.",
-          "Built REST APIs and microservices in Java 21 / Spring Boot, documented with OpenAPI / Swagger.",
+          "Upgraded backend services from Java 21 to the latest Java 25 LTS.",
+          "Built REST APIs and microservices in Java / Spring Boot, documented with OpenAPI / Swagger.",
           "Designed Kafka event-driven notification services and integrated six third-party payment gateways with real-time status updates.",
-          "Kept services fast under heavy concurrent load with Redis caching and PostgreSQL query optimization.",
+          "Kept services fast under heavy concurrent load with Redis caching, PostgreSQL query optimization and request-handling optimizations.",
           "Built real-time features: live location tracking for field agents, live user-activity tracking, and a CloudFront CDN + Lambda layer for document delivery.",
           "Shipped with Docker, Kubernetes (HPA autoscaling), Jenkins and Ansible, with deployment and test reports automated to email and Google Chat.",
-          "Wrote system design documents before new features and ran Git-based code reviews."
+          "Resolved urgent production and performance issues in real time, tracing root causes across code, data and deployment.",
+          "Wrote system design documents before new features, reviewed them with the team, and ran Git-based code reviews."
         ]
       },
       {
@@ -151,51 +257,93 @@
     ],
     "contactTitle": "Let's work together",
     "contactNote": "Thanks for riding along! I'm open to full-stack engineering roles. Let's talk.",
-    "primaryCta": { "label": "Download résumé", "href": "/resume.pdf", "download": true }
+    "primaryCta": {
+      "label": "Download résumé",
+      "href": "/resume.pdf",
+      "download": true
+    }
   },
-
   "freelancer": {
     "role": "Freelance Full-Stack Developer",
     "badge": "Available for freelance projects",
-    "tagline": "I design, build and ship web apps end to end: React and Next.js front ends, Spring Boot or Node.js APIs, and automated deployments.",
-    "sections": ["about", "services", "skills", "projects", "contact"],
+    "tagline": "I help teams turn ideas into polished, dependable products: clear scoping, thoughtful design, clean code, smooth launches and support as you grow.",
+    "sections": [
+      "about",
+      "services",
+      "skills",
+      "projects",
+      "contact"
+    ],
     "highlights": [
-      { "value": "2+", "label": "Years shipping production software" },
-      { "value": "End-to-end", "label": "UI, API, database and DevOps" },
-      { "value": "5", "label": "Case studies in the Project Book" }
+      {
+        "value": "2+",
+        "label": "Years shipping production software"
+      },
+      {
+        "value": "End-to-end",
+        "label": "UI, API, database and DevOps"
+      },
+      {
+        "value": "5",
+        "label": "Case studies in the Project Book"
+      }
     ],
     "services": [
       {
         "icon": "🖥️",
         "title": "Web app development",
         "description": "Responsive React / Next.js apps, from dashboards and admin panels to customer-facing products.",
-        "deliverables": ["React / Next.js", "Responsive UI", "State management"]
+        "deliverables": [
+          "React / Next.js",
+          "Responsive UI",
+          "State management"
+        ]
       },
       {
         "icon": "🔌",
         "title": "APIs & backend",
         "description": "Secure REST APIs and services in Java Spring Boot or Node.js, with clean data models and documentation.",
-        "deliverables": ["Spring Boot / Node.js", "PostgreSQL / MongoDB", "OpenAPI docs"]
+        "deliverables": [
+          "Spring Boot / Node.js",
+          "PostgreSQL / MongoDB",
+          "OpenAPI docs"
+        ]
       },
       {
         "icon": "⚙️",
         "title": "DevOps & deployment",
         "description": "Dockerised apps, CI/CD pipelines and server automation so every change ships safely.",
-        "deliverables": ["Docker", "Jenkins CI/CD", "Ansible / AWS"]
+        "deliverables": [
+          "Docker",
+          "Jenkins CI/CD",
+          "Ansible / AWS"
+        ]
       },
       {
         "icon": "⚡",
         "title": "Performance & fixes",
         "description": "Speed up slow pages and queries, add caching, and fix production issues at the root cause.",
-        "deliverables": ["Redis caching", "Query tuning", "Debugging"]
+        "deliverables": [
+          "Redis caching",
+          "Query tuning",
+          "Debugging"
+        ]
       }
     ],
-    "process": ["Free discovery call", "Proposal & estimate", "Weekly milestones", "Launch & handover"],
+    "process": [
+      "Free discovery call",
+      "Proposal & estimate",
+      "Weekly milestones",
+      "Launch & handover"
+    ],
     "availability": "Taking on new projects",
     "rates": "",
     "testimonials": [],
     "contactTitle": "Let's build something",
     "contactNote": "Have a project in mind? Tell me what you're building and I'll reply with ideas, a rough plan and an estimate.",
-    "primaryCta": { "label": "Start a project", "href": "mailto:aakapa95@gmail.com?subject=Project%20enquiry" }
+    "primaryCta": {
+      "label": "Start a project",
+      "href": "mailto:aakapa95@gmail.com?subject=Project%20enquiry"
+    }
   }
 }
