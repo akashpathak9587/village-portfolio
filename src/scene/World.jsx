@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { SAMPLES, curve, curveLength, distToRoad, journey, progressToT, rng, sideAt, terrainHeight } from './path';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { theme } from '../config';
 
 /** Scene palette from the active theme (src/config/themes.json → scene). */
@@ -280,7 +281,7 @@ function useVillageLayout(milestoneTs) {
       const p = curve.getPointAt(t);
       const s = sideAt(t);
       const dir = i % 2 === 0 ? 1 : -1;
-      reserved.push([p.x + s.x * 4 * dir, p.z + s.z * 4 * dir, 2.5]);
+      reserved.push([p.x + s.x * 3.4 * dir, p.z + s.z * 3.4 * dir, 3.2]);
       const [lx, lz] = landmarkXZ(t, dir);
       reserved.push([lx, lz, 7]);
     });
@@ -485,78 +486,235 @@ function Fields({ fields }) {
 /* Landmarks                                                           */
 /* ------------------------------------------------------------------ */
 
-function drawLabel(cv, text, color) {
+/* ---------------- Stop signboards ---------------- */
+
+const STOP_ICONS = { home: '🚲', about: '👋', skills: '🛠️', experience: '💼', services: '🧩', projects: '📚', contact: '✉️' };
+const STOP_KICKERS = ['Start', 'Home', 'Wind turbine', 'The studio', 'The lake', 'Mailbox'];
+const FONT_DISPLAY = `"${theme.ui.fonts.display}", "Space Grotesk", Inter, "Helvetica Neue", Arial, sans-serif`;
+const FONT_MONO = `"${theme.ui.fonts.mono}", "JetBrains Mono", Menlo, monospace`;
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/** Paint the sign face: stop pill, big title, icon badge and progress dots. */
+function drawSign(cv, { title, index, total, color, icon, kicker }) {
   const ctx = cv.getContext('2d');
   const W = cv.width;
   const H = cv.height;
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = S.signBg;
+
+  // Background: deep panel colour with a soft accent glow and a faint dot grid.
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, S.signBg);
+  bg.addColorStop(1, '#000000');
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
-  // Accent bar + soft glow
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, color);
-  g.addColorStop(1, S.landmark.accent);
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 18, H);
-  const glow = ctx.createRadialGradient(W * 0.85, 0, 0, W * 0.85, 0, W * 0.6);
-  glow.addColorStop(0, color + '55');
+  ctx.globalAlpha = 0.55;
+  const glow = ctx.createRadialGradient(W * 0.85, H * 0.1, 0, W * 0.85, H * 0.1, W * 0.55);
+  glow.addColorStop(0, color);
   glow.addColorStop(1, 'transparent');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
+  ctx.globalAlpha = 0.08;
   ctx.fillStyle = '#ffffff';
-  ctx.font = '700 74px "Space Grotesk", Inter, "Helvetica Neue", Arial, sans-serif';
-  ctx.textAlign = 'left';
+  for (let x = 24; x < W; x += 28) for (let y = 24; y < H; y += 28) ctx.fillRect(x, y, 2, 2);
+  ctx.globalAlpha = 1;
+
+  // Accent bar on the left edge.
+  const bar = ctx.createLinearGradient(0, 0, 0, H);
+  bar.addColorStop(0, color);
+  bar.addColorStop(1, S.landmark.accent);
+  ctx.fillStyle = bar;
+  ctx.fillRect(0, 0, 16, H);
+
+  // "STOP 02" pill + landmark name.
+  const pad = 64;
+  const stopText = index === 0 ? 'START' : `STOP ${String(index).padStart(2, '0')}`;
+  ctx.font = `700 34px ${FONT_MONO}`;
+  const pillW = ctx.measureText(stopText).width + 40;
+  roundRect(ctx, pad, 52, pillW, 54, 27);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, 52, H / 2 + 4, W - 80);
+  ctx.fillText(stopText, pad + 20, 80);
+  if (kicker && index > 0) {
+    ctx.font = `500 30px ${FONT_MONO}`;
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fillText(kicker.toUpperCase(), pad + pillW + 22, 80);
+  }
+
+  // Title.
+  ctx.font = `700 124px ${FONT_DISPLAY}`;
+  ctx.fillStyle = '#ffffff';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(title, pad - 4, 262, W - pad - 260);
+
+  // Progress dots.
+  const dotY = 340;
+  for (let k = 0; k < total; k++) {
+    const x = pad + k * 46;
+    ctx.beginPath();
+    if (k === index) {
+      roundRect(ctx, x - 4, dotY - 10, 36, 20, 10);
+      ctx.fillStyle = color;
+    } else {
+      ctx.arc(x + 10, dotY, 8, 0, Math.PI * 2);
+      ctx.fillStyle = k < index ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.22)';
+    }
+    ctx.fill();
+  }
+  ctx.font = `500 26px ${FONT_MONO}`;
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(index === total - 1 ? 'FINISH' : 'NEXT STOP AHEAD →', pad + total * 46 + 16, dotY + 1);
+
+  // Icon badge.
+  const cx = W - 160;
+  const cy = H / 2 - 6;
+  const badge = ctx.createLinearGradient(cx - 100, cy - 100, cx + 100, cy + 100);
+  badge.addColorStop(0, color);
+  badge.addColorStop(1, S.landmark.accent);
+  ctx.beginPath();
+  ctx.arc(cx, cy, 100, 0, Math.PI * 2);
+  ctx.fillStyle = badge;
+  ctx.fill();
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.stroke();
+  ctx.font = '96px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(icon, cx, cy + 6);
+  ctx.textAlign = 'left';
 }
 
-function labelTexture(text, color) {
-  const cv = document.createElement('canvas');
-  cv.width = 512;
-  cv.height = 180;
-  drawLabel(cv, text, color);
-  const tex = new THREE.CanvasTexture(cv);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
-  // Redraw once the web font has loaded so the sign uses Space Grotesk.
-  document.fonts?.ready.then(() => {
-    drawLabel(cv, text, color);
-    tex.needsUpdate = true;
-  });
-  return tex;
+function useSignTexture(opts, maxAniso) {
+  return useMemo(() => {
+    const cv = document.createElement('canvas');
+    cv.width = 1024;
+    cv.height = 424;
+    drawSign(cv, opts);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = maxAniso;
+    // Redraw once the theme's web fonts are ready.
+    Promise.all([
+      document.fonts?.load(`700 124px ${FONT_DISPLAY}`),
+      document.fonts?.load(`700 34px ${FONT_MONO}`),
+    ])
+      .catch(() => {})
+      .finally(() => {
+        drawSign(cv, opts);
+        tex.needsUpdate = true;
+      });
+    return tex;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opts.title, opts.index, opts.total, opts.color]);
 }
 
-function Signpost({ t, label, color, side }) {
-  const { position, rotation, texture } = useMemo(() => {
+const PANEL_W = 2.6;
+const PANEL_H = 1.1;
+const PANEL_Y = 2.2;
+
+function Signpost({ t, milestone, index, total, color, side }) {
+  const { gl } = useThree();
+  const group = useRef();
+  const rimMat = useRef();
+  const faceMat = useRef();
+  const lightMat = useRef();
+
+  const { position, rotation } = useMemo(() => {
     const p = curve.getPointAt(t);
     const s = sideAt(t);
     const tan = curve.getTangentAt(t);
-    const x = p.x + s.x * 3.2 * side;
-    const z = p.z + s.z * 3.2 * side;
+    const x = p.x + s.x * 3.4 * side;
+    const z = p.z + s.z * 3.4 * side;
     // Face the approaching rider: back along the road, slightly toward its centre.
-    const nx = -tan.x * 0.7 - s.x * side * 0.7;
-    const nz = -tan.z * 0.7 - s.z * side * 0.7;
-    return { position: [x, terrainHeight(x, z), z], rotation: Math.atan2(nx, nz), texture: labelTexture(label, color) };
-  }, [t, label, color, side]);
+    const nx = -tan.x * 0.75 - s.x * side * 0.65;
+    const nz = -tan.z * 0.75 - s.z * side * 0.65;
+    return { position: [x, terrainHeight(x, z), z], rotation: Math.atan2(nx, nz) };
+  }, [t, side]);
+
+  const texture = useSignTexture(
+    { title: milestone.sign, index, total, color, icon: STOP_ICONS[milestone.id] || '📍', kicker: STOP_KICKERS[index % STOP_KICKERS.length] },
+    gl.capabilities.getMaxAnisotropy(),
+  );
+  const geo = useMemo(
+    () => ({
+      panel: new RoundedBoxGeometry(PANEL_W, PANEL_H, 0.12, 4, 0.09),
+      rim: new RoundedBoxGeometry(PANEL_W + 0.08, PANEL_H + 0.08, 0.06, 4, 0.12),
+      footing: new RoundedBoxGeometry(0.3, 0.16, 0.3, 2, 0.04),
+    }),
+    [],
+  );
+
+  // Light up as the bike approaches this stop.
+  const stopP = index / (total - 1);
+  useFrame(() => {
+    const d = Math.abs(journey.smooth - stopP) * (total - 1);
+    const active = THREE.MathUtils.clamp(1 - d / 0.6, 0, 1);
+    const k = active * active * (3 - 2 * active);
+    group.current.scale.setScalar(1 + k * 0.06);
+    rimMat.current.emissiveIntensity = 0.5 + journey.dusk * 1.5 + k * 2.2;
+    faceMat.current.emissiveIntensity = 0.22 + journey.dusk * 0.35 + k * 0.25;
+    lightMat.current.emissiveIntensity = 0.4 + journey.dusk * 2 + k * 2;
+  });
 
   return (
     <group position={position} rotation={[0, rotation, 0]}>
-      <mesh position={[0, 1.1, 0]} castShadow>
-        <cylinderGeometry args={[0.05, 0.05, 2.2, 12]} />
-        <meshStandardMaterial color="#e9ecf8" metalness={0.6} roughness={0.3} />
-      </mesh>
-      <mesh position={[0, 2.25, 0]} castShadow>
-        <boxGeometry args={[2.4, 0.86, 0.1]} />
-        <meshStandardMaterial color={S.signBg} roughness={0.4} />
-      </mesh>
-      <mesh position={[0, 2.25, 0.051]}>
-        <planeGeometry args={[2.4, 0.86]} />
-        <meshStandardMaterial map={texture} roughness={0.4} emissive="#ffffff" emissiveMap={texture} emissiveIntensity={0.25} />
-      </mesh>
-      <mesh position={[0, 2.85, 0]}>
-        <sphereGeometry args={[0.11, 16, 16]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1.5} toneMapped={false} />
-      </mesh>
+      {/* concrete footings */}
+      {[-1, 1].map((sx) => (
+        <mesh key={`f${sx}`} geometry={geo.footing} position={[sx * 1.0, 0.06, 0]} receiveShadow castShadow>
+          <meshStandardMaterial color="#c9ccd6" roughness={0.9} />
+        </mesh>
+      ))}
+      {/* twin posts */}
+      {[-1, 1].map((sx) => (
+        <mesh key={`p${sx}`} position={[sx * 1.0, PANEL_Y / 2, -0.02]} castShadow>
+          <cylinderGeometry args={[0.045, 0.05, PANEL_Y, 16]} />
+          <meshStandardMaterial color="#e6e9f2" metalness={0.65} roughness={0.28} />
+        </mesh>
+      ))}
+      <group ref={group} position={[0, PANEL_Y, 0]}>
+        {/* glowing rim peeking around the panel */}
+        <mesh geometry={geo.rim} position={[0, 0, -0.03]}>
+          <meshStandardMaterial ref={rimMat} color={color} emissive={color} emissiveIntensity={0.5} toneMapped={false} />
+        </mesh>
+        {/* panel body */}
+        <mesh geometry={geo.panel} castShadow>
+          <meshStandardMaterial color={S.signBg} roughness={0.35} metalness={0.25} />
+        </mesh>
+        {/* printed face */}
+        <mesh position={[0, 0, 0.061]}>
+          <planeGeometry args={[PANEL_W - 0.12, PANEL_H - 0.12]} />
+          <meshStandardMaterial
+            ref={faceMat}
+            map={texture}
+            emissive="#ffffff"
+            emissiveMap={texture}
+            emissiveIntensity={0.22}
+            roughness={0.35}
+          />
+        </mesh>
+        {/* light bar above the sign */}
+        <mesh position={[0, PANEL_H / 2 + 0.1, 0.12]} rotation={[0.5, 0, 0]}>
+          <boxGeometry args={[PANEL_W * 0.7, 0.045, 0.12]} />
+          <meshStandardMaterial color="#2b2f45" metalness={0.5} roughness={0.35} />
+        </mesh>
+        <mesh position={[0, PANEL_H / 2 + 0.078, 0.15]} rotation={[0.5 - Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[PANEL_W * 0.66, 0.08]} />
+          <meshStandardMaterial ref={lightMat} color="#ffffff" emissive="#fff6dd" emissiveIntensity={0.4} toneMapped={false} />
+        </mesh>
+      </group>
     </group>
   );
 }
@@ -868,7 +1026,6 @@ function Birds() {
 
 /* ------------------------------------------------------------------ */
 
-const SIGN_COLORS = S.signColors;
 
 export default function World({ milestones }) {
   const milestoneTs = useMemo(() => milestones.map((_, i) => progressToT(i / (milestones.length - 1))), [milestones]);
@@ -902,7 +1059,15 @@ export default function World({ milestones }) {
       <Fields fields={layout.fields} />
       <Lanterns lanterns={layout.lanterns} bulbMat={bulbMat} />
       {milestones.map((m, i) => (
-        <Signpost key={m.id} t={Math.min(milestoneTs[i] + 0.012, 0.995)} label={m.sign} color={SIGN_COLORS[i % SIGN_COLORS.length]} side={i % 2 === 0 ? 1 : -1} />
+        <Signpost
+          key={m.id}
+          t={Math.min(milestoneTs[i] + 0.012, 0.995)}
+          milestone={m}
+          index={i}
+          total={milestones.length}
+          color={S.signColors[i % S.signColors.length]}
+          side={i % 2 === 0 ? 1 : -1}
+        />
       ))}
       {milestones.map((m, i) => (
         <Landmark key={`lm-${m.id}`} kind={LANDMARKS[i % LANDMARKS.length]} t={milestoneTs[i]} side={i % 2 === 0 ? 1 : -1} windowMat={windowMat} />
